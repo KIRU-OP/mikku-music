@@ -3,7 +3,7 @@ from pyrogram import Client, filters, enums
 from pyrogram.types import Message
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.errors import FloodWait, RPCError
-from AnonMusic import app
+from mikku import app
 
 @app.on_message(filters.command(["admins", "staff"]))
 async def get_admins(client: Client, message: Message):

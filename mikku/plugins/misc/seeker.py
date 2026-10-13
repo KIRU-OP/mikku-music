@@ -1,7 +1,7 @@
 import asyncio
 
-from AnonMusic.misc import db
-from AnonMusic.utils.database import get_active_chats, is_music_playing
+from mikku.misc import db
+from mikku.utils.database import get_active_chats, is_music_playing
 
 
 async def timer():

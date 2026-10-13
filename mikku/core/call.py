@@ -17,9 +17,9 @@ from pytgcalls.types import MediaStream,ChatUpdate
 
 import config
 from config import autoclean
-from AnonMusic import LOGGER, YouTube, app
-from AnonMusic.misc import db
-from AnonMusic.utils.database import (
+from mikku import LOGGER, YouTube, app
+from mikku.misc import db
+from mikku.utils.database import (
     add_active_chat,
     add_active_video_chat,
     get_lang,
@@ -31,10 +31,10 @@ from AnonMusic.utils.database import (
     remove_active_video_chat,
     set_loop,
 )
-from AnonMusic.utils.exceptions import AssistantErr
-from AnonMusic.utils.formatters import check_duration, seconds_to_min, speed_converter
-from AnonMusic.utils.inline.play import stream_markup
-from AnonMusic.utils.thumbnails import get_thumb
+from mikku.utils.exceptions import AssistantErr
+from mikku.utils.formatters import check_duration, seconds_to_min, speed_converter
+from mikku.utils.inline.play import stream_markup
+from mikku.utils.thumbnails import get_thumb
 from strings import get_string
 
 #=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×[ NO NEED COOKIES ]=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×

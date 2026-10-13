@@ -6,8 +6,8 @@ from typing import Union
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Voice
 
 import config
-from AnonMusic import app
-from AnonMusic.utils.formatters import (
+from mikku import app
+from mikku.utils.formatters import (
     check_duration,
     convert_bytes,
     get_readable_time,

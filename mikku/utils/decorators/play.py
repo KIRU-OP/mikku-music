@@ -8,9 +8,9 @@ from pyrogram.errors import (
 )
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from AnonMusic import YouTube, app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import (
+from mikku import YouTube, app
+from mikku.misc import SUDOERS
+from mikku.utils.database import (
     get_assistant,
     get_cmode,
     get_lang,
@@ -19,7 +19,7 @@ from AnonMusic.utils.database import (
     is_active_chat,
     is_maintenance,
 )
-from AnonMusic.utils.inline import botplaylist_markup
+from mikku.utils.inline import botplaylist_markup
 from config import PLAYLIST_IMG_URL, SUPPORT_CHAT, adminlist
 from strings import get_string
 

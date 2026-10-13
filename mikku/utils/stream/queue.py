@@ -1,8 +1,8 @@
 import asyncio
 from typing import Union
 
-from AnonMusic.misc import db
-from AnonMusic.utils.formatters import check_duration, seconds_to_min
+from mikku.misc import db
+from mikku.utils.formatters import check_duration, seconds_to_min
 from config import autoclean, time_to_seconds
 
 

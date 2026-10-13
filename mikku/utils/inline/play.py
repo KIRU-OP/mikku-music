@@ -1,7 +1,7 @@
 import math
-from AnonMusic import app
+from mikku import app
 from pyrogram.types import InlineKeyboardButton
-from AnonMusic.utils.formatters import time_to_seconds
+from mikku.utils.formatters import time_to_seconds
 
 
 def track_markup(_, videoid, user_id, channel, fplay):

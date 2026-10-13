@@ -2,9 +2,9 @@ from pyrogram import filters
 from pyrogram.enums import ChatMembersFilter, ChatMemberStatus, ChatType
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.utils.database import set_cmode
-from AnonMusic.utils.decorators.admins import AdminActual
+from mikku import app
+from mikku.utils.database import set_cmode
+from mikku.utils.decorators.admins import AdminActual
 from config import BANNED_USERS
 
 

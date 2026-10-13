@@ -118,7 +118,7 @@ packages() {
             check_status 0 "SUCCESS." "FAIL." "ffmpeg_log.txt" || exit 1
         else
             check_status 1 "" "FAIL." "ffmpeg_log.txt"
-            pprint "\nYou need to install ffmpeg manually in order to deploy AnonMusic. Exiting...\n" "CBLUE"
+            pprint "\nYou need to install ffmpeg manually in order to deploy mikku. Exiting...\n" "CBLUE"
             exit 1
         fi
     fi
@@ -175,7 +175,7 @@ installation() {
 # --- Main Script Execution ---
 
 clear
-pprint "Welcome to AnonMusic Setup Installer\n\n" "CBLUE"
+pprint "Welcome to mikku Setup Installer\n\n" "CBLUE"
 pprint "If you encounter any errors during the installation process, please refer to these files for logs:\n" "CYELLOW"
 pprint "  - For Node.js errors: nodelog.txt\n" "CYELLOW"
 pprint "  - For Python package errors: pypilog.txt\n" "CYELLOW"
@@ -195,7 +195,7 @@ packages
 node
 installation
 
-pprint "\n\n\nAnonMusic Installation Completed!\n" "CGREEN"
+pprint "\n\n\nmikku Installation Completed!\n" "CGREEN"
 sleep 1
 clear
 
@@ -254,7 +254,7 @@ fi
 
 clear
 
-pprint "\n\n\nThanks for using AnonMusic installer! Your variables have been saved successfully.\n" "CGREEN"
+pprint "\n\n\nThanks for using mikku installer! Your variables have been saved successfully.\n" "CGREEN"
 pprint "If you want to add more variables, edit your .env file using: " "CBLUE"
 pprint "vi .env" "CYELLOW" # Suggesting 'vi' as it was in the original, 'nano' is also common.
 pprint "\n\nNow you can start the bot by: " "CBLUE"

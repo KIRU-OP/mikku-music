@@ -1,5 +1,5 @@
 import config
-from AnonMusic import app
+from mikku import app
 from pyrogram.types import InlineKeyboardButton, WebAppInfo
 
 def start_panel(_):

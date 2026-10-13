@@ -1,8 +1,8 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.core.call import Anony
+from mikku import app
+from mikku.core.call import Anony
 
 welcome = 20
 close = 30

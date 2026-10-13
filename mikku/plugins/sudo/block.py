@@ -1,11 +1,11 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import add_gban_user, remove_gban_user
-from AnonMusic.utils.decorators.language import language
-from AnonMusic.utils.extraction import extract_user
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.database import add_gban_user, remove_gban_user
+from mikku.utils.decorators.language import language
+from mikku.utils.extraction import extract_user
 from config import BANNED_USERS
 
 

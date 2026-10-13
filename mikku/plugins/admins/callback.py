@@ -3,11 +3,11 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup,CallbackQu
 from pyrogram import Client, filters
 from pyrogram.errors import MessageDeleteForbidden, ChatAdminRequired # ये दो एक्सेप्शन्स जिन्हें हम हैंडल करेंगे
 
-from AnonMusic.utils.database import get_assistant
-from AnonMusic import YouTube, app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import SUDOERS, db
-from AnonMusic.utils.database import (
+from mikku.utils.database import get_assistant
+from mikku import YouTube, app
+from mikku.core.call import Anony
+from mikku.misc import SUDOERS, db
+from mikku.utils.database import (
     get_active_chats,
     get_lang,
     get_upvote_count,
@@ -18,10 +18,10 @@ from AnonMusic.utils.database import (
     music_on,
     set_loop,
 )
-from AnonMusic.utils.decorators.language import languageCB
-from AnonMusic.utils.formatters import seconds_to_min
-from AnonMusic.utils.inline import close_markup, stream_markup, stream_markup_timer
-from AnonMusic.utils.thumbnails import get_thumb
+from mikku.utils.decorators.language import languageCB
+from mikku.utils.formatters import seconds_to_min
+from mikku.utils.inline import close_markup, stream_markup, stream_markup_timer
+from mikku.utils.thumbnails import get_thumb
 from config import (
     BANNED_USERS,
     SOUNCLOUD_IMG_URL,

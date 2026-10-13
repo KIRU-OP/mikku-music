@@ -5,8 +5,8 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.raw.functions.messages import DeleteHistory
 
-from AnonMusic import userbot as us, app
-from AnonMusic.core.userbot import assistants
+from mikku import userbot as us, app
+from mikku.core.userbot import assistants
 
 @app.on_message(filters.command("sg"))
 async def sg(client: Client, message: Message):

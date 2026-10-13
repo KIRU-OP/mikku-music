@@ -4,9 +4,9 @@ import speedtest
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.decorators.language import language
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.decorators.language import language
 
 
 def perform_speedtest():

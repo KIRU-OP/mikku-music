@@ -1,9 +1,9 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.database import (
     get_lang,
     is_maintenance,
     maintenance_off,

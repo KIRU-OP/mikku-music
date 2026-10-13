@@ -1,16 +1,16 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.utils import extract_user, int_to_alpha
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.utils import extract_user, int_to_alpha
+from mikku.utils.database import (
     delete_authuser,
     get_authuser,
     get_authuser_names,
     save_authuser,
 )
-from AnonMusic.utils.decorators import AdminActual, language
-from AnonMusic.utils.inline import close_markup
+from mikku.utils.decorators import AdminActual, language
+from mikku.utils.inline import close_markup
 from config import BANNED_USERS, adminlist
 
 

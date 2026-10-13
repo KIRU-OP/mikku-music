@@ -2,9 +2,9 @@ from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from unidecode import unidecode
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.database import (
     get_active_chats,
     get_active_video_chats,
     remove_active_chat,

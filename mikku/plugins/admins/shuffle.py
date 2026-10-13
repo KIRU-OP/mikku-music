@@ -3,10 +3,10 @@ import random
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.misc import db
-from AnonMusic.utils.decorators import AdminRightsCheck
-from AnonMusic.utils.inline import close_markup
+from mikku import app
+from mikku.misc import db
+from mikku.utils.decorators import AdminRightsCheck
+from mikku.utils.inline import close_markup
 from config import BANNED_USERS
 
 

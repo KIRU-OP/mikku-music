@@ -5,9 +5,9 @@ from datetime import datetime
 from pyrogram.enums import ChatType
 
 import config
-from AnonMusic import app
-from AnonMusic.core.call import Anony, autoend
-from AnonMusic.utils.database import get_client, is_active_chat, is_autoend
+from mikku import app
+from mikku.core.call import Anony, autoend
+from mikku.utils.database import get_client, is_active_chat, is_autoend
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ async def auto_leave():
 
     while True:
         await asyncio.sleep(config.ASSISTANT_LEAVE_TIME)
-        from AnonMusic.core.userbot import assistants
+        from mikku.core.userbot import assistants
 
         for num in assistants:
             client = await get_client(num)

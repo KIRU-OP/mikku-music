@@ -10,11 +10,11 @@ from pyrogram.errors import (
     BadRequest, # General client-side error
 )
 
-from AnonMusic import app
-from AnonMusic.utils import help_pannel
-from AnonMusic.utils.database import get_lang
-from AnonMusic.utils.decorators.language import LanguageStart, languageCB
-from AnonMusic.utils.inline.help import help_back_markup, private_help_panel
+from mikku import app
+from mikku.utils import help_pannel
+from mikku.utils.database import get_lang
+from mikku.utils.decorators.language import LanguageStart, languageCB
+from mikku.utils.inline.help import help_back_markup, private_help_panel
 import config
 from strings import get_string, helpers
 

@@ -1,7 +1,7 @@
 from pyrogram.enums import ParseMode
 
-from AnonMusic import app
-from AnonMusic.utils.database import is_on_off
+from mikku import app
+from mikku.utils.database import is_on_off
 from config import LOGGER_ID
 
 

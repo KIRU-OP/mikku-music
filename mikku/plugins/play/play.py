@@ -7,22 +7,22 @@ from pyrogram.errors.exceptions.bad_request_400 import MessageIdInvalid
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
-from AnonMusic import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
-from AnonMusic.core.call import Anony
-from AnonMusic.utils import seconds_to_min, time_to_seconds
-from AnonMusic.utils.channelplay import get_channeplayCB
-from AnonMusic.utils.decorators.language import languageCB
-from AnonMusic.utils.decorators.play import PlayWrapper
-from AnonMusic.utils.formatters import formats
-from AnonMusic.utils.inline import (
+from mikku import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
+from mikku.core.call import Anony
+from mikku.utils import seconds_to_min, time_to_seconds
+from mikku.utils.channelplay import get_channeplayCB
+from mikku.utils.decorators.language import languageCB
+from mikku.utils.decorators.play import PlayWrapper
+from mikku.utils.formatters import formats
+from mikku.utils.inline import (
     botplaylist_markup,
     livestream_markup,
     playlist_markup,
     slider_markup,
     track_markup,
 )
-from AnonMusic.utils.logger import play_logs
-from AnonMusic.utils.stream.stream import stream
+from mikku.utils.logger import play_logs
+from mikku.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
 
 

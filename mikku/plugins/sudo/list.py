@@ -9,8 +9,8 @@ from os.path import exists, isdir, join, getsize, getmtime, getatime
 from pyrogram import filters
 from pyrogram.types import Message, InputMediaDocument
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
+from mikku import app
+from mikku.misc import SUDOERS
 
 # Constants
 MAX_MESSAGE_SIZE_LIMIT = 4095

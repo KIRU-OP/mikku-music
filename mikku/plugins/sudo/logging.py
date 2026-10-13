@@ -1,5 +1,5 @@
 import logging
-from AnonMusic import app
+from mikku import app
 from pyrogram import Client, filters
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.types import Message, ChatMemberUpdated

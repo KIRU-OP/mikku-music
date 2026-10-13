@@ -16,9 +16,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from youtubesearchpython.__future__ import VideosSearch, CustomSearch
 import base64
-from AnonMusic import LOGGER
-from AnonMusic.utils.database import is_on_off
-from AnonMusic.utils.formatters import time_to_seconds
+from mikku import LOGGER
+from mikku.utils.database import is_on_off
+from mikku.utils.formatters import time_to_seconds
 from config import YT_API_KEY, YTPROXY_URL as YTPROXY
 
 logger = LOGGER(__name__)

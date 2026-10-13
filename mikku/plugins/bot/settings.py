@@ -8,8 +8,8 @@ from pyrogram.types import (
     Message,
 )
 
-from AnonMusic import app
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.utils.database import (
     add_nonadmin_chat,
     get_authuser,
     get_authuser_names,
@@ -25,15 +25,15 @@ from AnonMusic.utils.database import (
     skip_off,
     skip_on,
 )
-from AnonMusic.utils.decorators.admins import ActualAdminCB
-from AnonMusic.utils.decorators.language import language, languageCB
-from AnonMusic.utils.inline.settings import (
+from mikku.utils.decorators.admins import ActualAdminCB
+from mikku.utils.decorators.language import language, languageCB
+from mikku.utils.inline.settings import (
     auth_users_markup,
     playmode_users_markup,
     setting_markup,
     vote_mode_markup,
 )
-from AnonMusic.utils.inline.start import private_panel
+from mikku.utils.inline.start import private_panel
 from config import BANNED_USERS, OWNER_ID
 
 # --- Helper function for safe callback answers ---

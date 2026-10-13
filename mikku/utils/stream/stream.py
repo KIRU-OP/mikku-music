@@ -5,15 +5,15 @@ from typing import Union
 from pyrogram.types import InlineKeyboardMarkup
 
 import config
-from AnonMusic import Carbon, YouTube, app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import db
-from AnonMusic.utils.database import add_active_video_chat, is_active_chat
-from AnonMusic.utils.exceptions import AssistantErr
-from AnonMusic.utils.inline import aq_markup, close_markup, stream_markup
-from AnonMusic.utils.pastebin import AnonyBin
-from AnonMusic.utils.stream.queue import put_queue, put_queue_index
-from AnonMusic.utils.thumbnails import get_thumb
+from mikku import Carbon, YouTube, app
+from mikku.core.call import Anony
+from mikku.misc import db
+from mikku.utils.database import add_active_video_chat, is_active_chat
+from mikku.utils.exceptions import AssistantErr
+from mikku.utils.inline import aq_markup, close_markup, stream_markup
+from mikku.utils.pastebin import AnonyBin
+from mikku.utils.stream.queue import put_queue, put_queue_index
+from mikku.utils.thumbnails import get_thumb
 
 
 async def stream(

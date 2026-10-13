@@ -6,12 +6,12 @@ from pyrogram.errors import FloodWait
 from pyrogram.types import CallbackQuery, InputMediaPhoto, Message
 
 import config
-from AnonMusic import app
-from AnonMusic.misc import db
-from AnonMusic.utils import AnonyBin, get_channeplayCB, seconds_to_min
-from AnonMusic.utils.database import get_cmode, is_active_chat, is_music_playing
-from AnonMusic.utils.decorators.language import language, languageCB
-from AnonMusic.utils.inline import queue_back_markup, queue_markup
+from mikku import app
+from mikku.misc import db
+from mikku.utils import AnonyBin, get_channeplayCB, seconds_to_min
+from mikku.utils.database import get_cmode, is_active_chat, is_music_playing
+from mikku.utils.decorators.language import language, languageCB
+from mikku.utils.inline import queue_back_markup, queue_markup
 from config import BANNED_USERS
 
 basic = {}

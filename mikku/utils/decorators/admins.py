@@ -1,9 +1,9 @@
 from pyrogram.enums import ChatType
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup,Message
 from pyrogram.errors.exceptions.forbidden_403 import ChatWriteForbidden
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS, db
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import SUDOERS, db
+from mikku.utils.database import (
     get_authuser_names,
     get_cmode,
     get_lang,

@@ -10,10 +10,10 @@ from pyrogram.errors import ChannelPrivate, SlowmodeWait, PeerIdInvalid, UserNot
 from youtubesearchpython.__future__ import VideosSearch
 
 import config
-from AnonMusic import app
-from AnonMusic.misc import _boot_
-from AnonMusic.plugins.sudo.sudoers import sudoers_list
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import _boot_
+from mikku.plugins.sudo.sudoers import sudoers_list
+from mikku.utils.database import (
     add_served_chat,
     add_served_user,
     blacklisted_chats,
@@ -22,9 +22,9 @@ from AnonMusic.utils.database import (
     is_on_off,
     blacklist_chat,
 )
-from AnonMusic.utils.decorators.language import LanguageStart
-from AnonMusic.utils.formatters import get_readable_time
-from AnonMusic.utils.inline import help_pannel, private_panel, start_panel
+from mikku.utils.decorators.language import LanguageStart
+from mikku.utils.formatters import get_readable_time
+from mikku.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 

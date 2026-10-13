@@ -11,7 +11,7 @@
         "telegram-bot",
         "pyrogram",
         "py-tgcalls",
-        "AnonMusic"
+        "mikku"
     ],
     "env": {
       "API_ID": {

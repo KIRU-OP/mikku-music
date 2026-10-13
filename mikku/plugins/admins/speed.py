@@ -1,13 +1,13 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import SUDOERS, db
-from AnonMusic.utils import AdminRightsCheck
-from AnonMusic.utils.database import is_active_chat, is_nonadmin_chat
-from AnonMusic.utils.decorators.language import languageCB
-from AnonMusic.utils.inline import close_markup, speed_markup
+from mikku import app
+from mikku.core.call import Anony
+from mikku.misc import SUDOERS, db
+from mikku.utils import AdminRightsCheck
+from mikku.utils.database import is_active_chat, is_nonadmin_chat
+from mikku.utils.decorators.language import languageCB
+from mikku.utils.inline import close_markup, speed_markup
 from config import BANNED_USERS, adminlist
 
 checker = []

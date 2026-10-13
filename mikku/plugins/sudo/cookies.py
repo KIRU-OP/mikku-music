@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton as Button
-from AnonMusic import app
+from mikku import app
 from config import COOKIES_URL, OWNER_ID
 import asyncio
 import os

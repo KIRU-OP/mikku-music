@@ -1,18 +1,18 @@
 from pyrogram import filters
 
 
-from AnonMusic import YouTube, app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import db
-from AnonMusic.utils import AdminRightsCheck, seconds_to_min
-from AnonMusic.utils.inline import close_markup
+from mikku import YouTube, app
+from mikku.core.call import Anony
+from mikku.misc import db
+from mikku.utils import AdminRightsCheck, seconds_to_min
+from mikku.utils.inline import close_markup
 from config import BANNED_USERS
 
 from pyrogram.types import CallbackQuery, Message
-from AnonMusic import app, YouTube
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import db, SUDOERS
-from AnonMusic.utils import seconds_to_min
+from mikku import app, YouTube
+from mikku.core.call import Anony
+from mikku.misc import db, SUDOERS
+from mikku.utils import seconds_to_min
 from config import BANNED_USERS
 
 @app.on_message(

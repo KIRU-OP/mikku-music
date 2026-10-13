@@ -4,10 +4,10 @@ from pyrogram import filters
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils import get_readable_time
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils import get_readable_time
+from mikku.utils.database import (
     add_banned_user,
     get_banned_count,
     get_banned_users,
@@ -15,8 +15,8 @@ from AnonMusic.utils.database import (
     is_banned_user,
     remove_banned_user,
 )
-from AnonMusic.utils.decorators.language import language
-from AnonMusic.utils.extraction import extract_user
+from mikku.utils.decorators.language import language
+from mikku.utils.extraction import extract_user
 from config import BANNED_USERS
 
 

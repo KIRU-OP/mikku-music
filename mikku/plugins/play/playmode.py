@@ -1,10 +1,10 @@
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, Message
 
-from AnonMusic import app
-from AnonMusic.utils.database import get_playmode, get_playtype, is_nonadmin_chat
-from AnonMusic.utils.decorators import language
-from AnonMusic.utils.inline.settings import playmode_users_markup
+from mikku import app
+from mikku.utils.database import get_playmode, get_playtype, is_nonadmin_chat
+from mikku.utils.decorators import language
+from mikku.utils.inline.settings import playmode_users_markup
 from config import BANNED_USERS
 
 

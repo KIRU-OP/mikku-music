@@ -5,12 +5,12 @@ from pyrogram import filters
 from pyrogram.enums import ChatMembersFilter
 from pyrogram.types import CallbackQuery, Message
 
-from AnonMusic import app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import db
-from AnonMusic.utils.database import get_assistant, get_authuser_names, get_cmode
-from AnonMusic.utils.decorators import ActualAdminCB, AdminActual, language
-from AnonMusic.utils.formatters import alpha_to_int, get_readable_time
+from mikku import app
+from mikku.core.call import Anony
+from mikku.misc import db
+from mikku.utils.database import get_assistant, get_authuser_names, get_cmode
+from mikku.utils.decorators import ActualAdminCB, AdminActual, language
+from mikku.utils.formatters import alpha_to_int, get_readable_time
 from config import BANNED_USERS, adminlist, lyrical
 
 rel = {}

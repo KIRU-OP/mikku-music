@@ -1,10 +1,10 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import blacklist_chat, blacklisted_chats, whitelist_chat
-from AnonMusic.utils.decorators.language import language
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.database import blacklist_chat, blacklisted_chats, whitelist_chat
+from mikku.utils.decorators.language import language
 from config import BANNED_USERS
 
 

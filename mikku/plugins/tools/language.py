@@ -2,9 +2,9 @@ from pykeyboard import InlineKeyboard
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, Message
 
-from AnonMusic import app
-from AnonMusic.utils.database import get_lang, set_lang
-from AnonMusic.utils.decorators import ActualAdminCB, language, languageCB
+from mikku import app
+from mikku.utils.database import get_lang, set_lang
+from mikku.utils.decorators import ActualAdminCB, language, languageCB
 from config import BANNED_USERS
 from strings import get_string, languages_present
 

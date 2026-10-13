@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from AnonMusic import app
+from mikku import app
 
 
 @app.on_message(filters.command('id'))

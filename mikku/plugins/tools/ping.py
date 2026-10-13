@@ -5,15 +5,15 @@ from pyrogram import filters
 from pyrogram.types import Message
 from pyrogram.errors import RPCError, FloodWait # Import specific Pyrogram errors
 
-from AnonMusic import app
-from AnonMusic.core.call import Anony
-from AnonMusic.utils import bot_sys_stats
-from AnonMusic.utils.decorators.language import language
-from AnonMusic.utils.inline import supp_markup
+from mikku import app
+from mikku.core.call import Anony
+from mikku.utils import bot_sys_stats
+from mikku.utils.decorators.language import language
+from mikku.utils.inline import supp_markup
 from config import BANNED_USERS, PING_IMG_URL
 
 # Import logging if not already globally available in this file's context
-# from AnonMusic.logging import LOGGER 
+# from mikku.logging import LOGGER 
 
 
 @app.on_message(filters.command(["ping", "alive"]) & ~BANNED_USERS)

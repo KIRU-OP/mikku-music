@@ -10,7 +10,7 @@ from time import time
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from AnonMusic import app
+from mikku import app
 
 
 DEV = [6972508083,6972508083]

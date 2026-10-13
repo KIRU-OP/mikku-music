@@ -7,8 +7,8 @@ from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from typing import Dict, List, Tuple
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
+from mikku import app
+from mikku.misc import SUDOERS
 
 # Constants
 CLEANABLE_FOLDERS = ["downloads", "cache", "temp"]

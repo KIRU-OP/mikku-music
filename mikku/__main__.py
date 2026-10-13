@@ -5,13 +5,13 @@ from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
-from AnonMusic import LOGGER, app, userbot
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import sudo
-from AnonMusic.plugins import ALL_MODULES
-from AnonMusic.utils.database import get_banned_users, get_gbanned
+from mikku import LOGGER, app, userbot
+from mikku.core.call import Anony
+from mikku.misc import sudo
+from mikku.plugins import ALL_MODULES
+from mikku.utils.database import get_banned_users, get_gbanned
 from config import BANNED_USERS, COOKIES_URL
-from AnonMusic.plugins.sudo.cookies import set_cookies
+from mikku.plugins.sudo.cookies import set_cookies
 
 async def init():
     if (
@@ -35,14 +35,14 @@ async def init():
         pass
     await app.start()
     for all_module in ALL_MODULES:
-        importlib.import_module("AnonMusic.plugins" + all_module)
-    LOGGER("AnonMusic.plugins").info("🗃️ Successfully Imported Modules...")
+        importlib.import_module("mikku.plugins" + all_module)
+    LOGGER("mikku.plugins").info("🗃️ Successfully Imported Modules...")
     await userbot.start()
     await Anony.start()
     try:
         await Anony.stream_call("https://te.legra.ph/file/29f784eb49d230ab62e9e.mp4")
     except NoActiveGroupCall:
-        LOGGER("AnonMusic").error(
+        LOGGER("mikku").error(
             "[×] Please turn on the videochat of your log group\channel Stopping Bot..."
         )
         exit()
@@ -50,11 +50,11 @@ async def init():
         pass
 
     res = await set_cookies(COOKIES_URL)
-    LOGGER("AnonMusic").info(f"{res}")
+    LOGGER("mikku").info(f"{res}")
     await Anony.decorators()
     await idle()
     await app.stop()
-    LOGGER("AnonMusic").info("🚫 Stopping AnonX Music Bot...")
+    LOGGER("mikku").info("🚫 Stopping AnonX Music Bot...")
 
 
 if __name__ == "__main__":

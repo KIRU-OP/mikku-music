@@ -1,11 +1,11 @@
 from pyrogram import filters
 from pyrogram.types import Message
 
-from AnonMusic import app
-from AnonMusic.core.call import Anony
-from AnonMusic.utils.database import is_music_playing, music_on
-from AnonMusic.utils.decorators import AdminRightsCheck
-from AnonMusic.utils.inline import close_markup
+from mikku import app
+from mikku.core.call import Anony
+from mikku.utils.database import is_music_playing, music_on
+from mikku.utils.decorators import AdminRightsCheck
+from mikku.utils.inline import close_markup
 from config import BANNED_USERS
 
 

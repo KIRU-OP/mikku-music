@@ -2,13 +2,13 @@ from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, Message
 
 import config
-from AnonMusic import YouTube, app
-from AnonMusic.core.call import Anony
-from AnonMusic.misc import db
-from AnonMusic.utils.database import get_loop
-from AnonMusic.utils.decorators import AdminRightsCheck
-from AnonMusic.utils.inline import close_markup, stream_markup
-from AnonMusic.utils.thumbnails import get_thumb
+from mikku import YouTube, app
+from mikku.core.call import Anony
+from mikku.misc import db
+from mikku.utils.database import get_loop
+from mikku.utils.decorators import AdminRightsCheck
+from mikku.utils.inline import close_markup, stream_markup
+from mikku.utils.thumbnails import get_thumb
 from config import BANNED_USERS,autoclean
 
 

@@ -7,15 +7,15 @@ from pyrogram.enums import ChatMembersFilter
 from pyrogram.errors import FloodWait, RPCError
 from pyrogram.types import Message, User, Chat
 
-from AnonMusic import app
-from AnonMusic.misc import SUDOERS
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import SUDOERS
+from mikku.utils.database import (
     get_active_chats,
     get_authuser_names,
     get_served_chats,
     get_served_users,
 )
-from AnonMusic.utils.formatters import alpha_to_int
+from mikku.utils.formatters import alpha_to_int
 from config import adminlist
 
 class BroadcastStatus:

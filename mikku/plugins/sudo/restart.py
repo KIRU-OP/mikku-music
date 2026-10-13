@@ -10,15 +10,15 @@ from git.exc import GitCommandError, InvalidGitRepositoryError
 from pyrogram import filters
 
 import config
-from AnonMusic import app
-from AnonMusic.misc import HAPP, SUDOERS, XCB
-from AnonMusic.utils.database import (
+from mikku import app
+from mikku.misc import HAPP, SUDOERS, XCB
+from mikku.utils.database import (
     get_active_chats,
     remove_active_chat,
     remove_active_video_chat,
 )
-from AnonMusic.utils.decorators.language import language
-from AnonMusic.utils.pastebin import AnonyBin
+from mikku.utils.decorators.language import language
+from mikku.utils.pastebin import AnonyBin
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

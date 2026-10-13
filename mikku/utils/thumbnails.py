@@ -6,7 +6,7 @@ import logging
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from youtubesearchpython.__future__ import VideosSearch
 from config import YOUTUBE_IMG_URL
-from AnonMusic import app
+from mikku import app
 
 # Logging Setup
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -128,8 +128,8 @@ async def get_thumb(videoid: str) -> str:
         logging.error(f"Thumbnail error: {e}")
 
     try:
-        title_font = ImageFont.truetype("AnonMusic/assets/thumb/font2.ttf", 30)
-        meta_font = ImageFont.truetype("AnonMusic/assets/thumb/font.ttf", 22)
+        title_font = ImageFont.truetype("mikku/assets/thumb/font2.ttf", 30)
+        meta_font = ImageFont.truetype("mikku/assets/thumb/font.ttf", 22)
         draw = ImageDraw.Draw(bg)
 
         title_text = trim_to_width(title, title_font, MAX_TITLE_WIDTH)
@@ -138,7 +138,7 @@ async def get_thumb(videoid: str) -> str:
         draw.text((META_X, META_Y), f"YouTube | {views}           Player : @{app.username}", fill="#FF0000", font=meta_font)
 
         if is_live:
-            live_font = ImageFont.truetype("AnonMusic/assets/thumb/font2.ttf", 22)
+            live_font = ImageFont.truetype("mikku/assets/thumb/font2.ttf", 22)
             draw.ellipse((META_X + 200, META_Y - 5, META_X + 225, META_Y + 20), fill=(255, 0, 0, 255))
             draw.text((META_X + 230, META_Y), "LIVE", fill="red", font=live_font)
     except Exception as e:
@@ -159,7 +159,7 @@ async def get_thumb(videoid: str) -> str:
 
     # Icons
     try:
-        icons_path = "AnonMusic/assets/thumb/play_icons.png"
+        icons_path = "mikku/assets/thumb/play_icons.png"
         if os.path.isfile(icons_path):
             icons = Image.open(icons_path).resize((ICONS_W, ICONS_H)).convert("RGBA")
         else:

@@ -3,7 +3,7 @@ from pytz import timezone
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import ChatAdminRequired
-from AnonMusic import app
+from mikku import app
 from config import LOGGER_ID
 
 
