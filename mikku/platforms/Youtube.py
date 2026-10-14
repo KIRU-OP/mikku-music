@@ -20,13 +20,13 @@ try:
 except ImportError:
     Recommendations = None
 import base64
-from VIVAANXMUSIC import LOGGER
-from VIVAANXMUSIC.utils.database import is_on_off
-from VIVAANXMUSIC.utils.formatters import time_to_seconds
-from VIVAANXMUSIC.utils.url_guard import is_safe_media_url
-from VIVAANXMUSIC.security import build_subprocess_env
-from VIVAANXMUSIC.utils.stream.source_status import set_youtube_source_status
-from VIVAANXMUSIC.utils.esse_autoplay import (
+from mikku import LOGGER
+from mikku.utils.database import is_on_off
+from mikku.utils.formatters import time_to_seconds
+from mikku.utils.url_guard import is_safe_media_url
+from mikku.security import build_subprocess_env
+from mikku.utils.stream.source_status import set_youtube_source_status
+from mikku.utils.esse_autoplay import (
     is_playable_autoplay_metadata,
     select_or_fallback,
 )
