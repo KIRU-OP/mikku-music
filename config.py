@@ -36,6 +36,9 @@ DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 300))  # Max duration in minut
 ASSISTANT_LEAVE_TIME = int(getenv("ASSISTANT_LEAVE_TIME", 5400))  # Time after which assistant leaves (in seconds)
 CACHE_DURATION = int(getenv("CACHE_DURATION", 86400))  # Duration to cache files
 CACHE_SLEEP = int(getenv("CACHE_SLEEP", 3600))  # Interval to clean cache
+ESSE_API_URL = getenv("ESSE_API_URL", "https://esse.skybotsdeveloper.workers.dev")
+ESSE_API_KEY = getenv("ESSE_API_KEY", "")
+ESSE_TIMEOUT = getenv("ESSE_TIMEOUT", "20")
 
 # Logging & ownership
 LOGGER_ID = int(getenv("LOGGER_ID"))  # Chat ID where logs go
