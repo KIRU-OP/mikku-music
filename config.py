@@ -38,9 +38,9 @@ LOGGER_ID = int(getenv("LOGGER_ID"))    # Jis chat/group mein logs aayenge uski 
 # ──────────────────────────────────────────────
 # 5. Support aur Community links
 # ──────────────────────────────────────────────
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/heroku_club")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/nobita_support")
-UPDATE_CHANNEL = getenv("UPDATE_CHANNEL", "https://t.me/heroku_club")   # "Channel Update" button
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_deadly_venom")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/group_voice_chat")
+UPDATE_CHANNEL = getenv("UPDATE_CHANNEL", "https://t.me/NEXO_BOT_SUPPORT")   # "Channel Update" button
 POLICY_LINK = getenv("POLICY_LINK", "https://telegra.ph/your-policy-page")  # "Policy" button
 
 # ──────────────────────────────────────────────
