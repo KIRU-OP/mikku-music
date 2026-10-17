@@ -59,8 +59,8 @@ ESSE_TIMEOUT = getenv("ESSE_TIMEOUT", "20")
 # ──────────────────────────────────────────────
 # 7. Spotify (https://developer.spotify.com/dashboard se milte hain)
 # ──────────────────────────────────────────────
-SPOTIFY_CLIENT_ID = getenv("SPOTIFY_CLIENT_ID", "")
-SPOTIFY_CLIENT_SECRET = getenv("SPOTIFY_CLIENT_SECRET", "")
+SPOTIFY_CLIENT_ID = getenv("SPOTIFY_CLIENT_ID", "22b6125bfe224587b722d6815002db2b")
+SPOTIFY_CLIENT_SECRET = getenv("SPOTIFY_CLIENT_SECRET", "c9c63c6fbf2f467c8bc68624851e9773"")
 PLAYLIST_FETCH_LIMIT = int(getenv("PLAYLIST_FETCH_LIMIT", 25))  # Ek baar mein kitne tracks
 
 # ──────────────────────────────────────────────
