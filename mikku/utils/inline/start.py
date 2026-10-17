@@ -23,10 +23,10 @@ def private_panel(_):
         ],
         [
             InlineKeyboardButton(text=_["S_B_6"], user_id=config.OWNER_ID),
-            InlineKeyboardButton(text=_["S_B_5"], url=config.SUPPORT_CHANNEL),
+            InlineKeyboardButton(text=_["S_B_5"], url=config.SUPPORT_CHAT),
         ],
         [
-            InlineKeyboardButton(text="ᴄʜᴀɴɴᴇʟ ᴜᴘᴅᴀᴛᴇ", url=config.UPDATE_CHANNEL),
+            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇ", url=config.UPDATE_CHANNEL),
             InlineKeyboardButton(text="ᴘᴏʟɪᴄʏ", url=config.POLICY_LINK),
         ],
         [
