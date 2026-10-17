@@ -4,85 +4,106 @@ from os import getenv
 from dotenv import load_dotenv
 from pyrogram import filters
 
-import os
-
-YTDL_COOKIES = os.getenv("YTDL_COOKIES", "cookies.txt")
-
-# Load variables from .env file
+# ──────────────────────────────────────────────
+# 1. .env file load karo (sabse pehle, taaki neeche ki saari values sahi padhein)
+# ──────────────────────────────────────────────
 load_dotenv()
 
-# Telegram API credentials (get from https://my.telegram.org/apps)
+
+def str_to_bool(value, default=False):
+    """'true', '1', 'yes' ko True maanta hai, baaki sab False."""
+    if value is None:
+        return default
+    return str(value).strip().lower() in ("true", "1", "yes", "on")
+
+
+# ──────────────────────────────────────────────
+# 2. Telegram credentials (https://my.telegram.org/apps se milte hain)
+# ──────────────────────────────────────────────
 API_ID = int(getenv("API_ID"))
 API_HASH = getenv("API_HASH")
+BOT_TOKEN = getenv("BOT_TOKEN")  # @BotFather se milta hai
 
-# Bot token (from @BotFather)
-BOT_TOKEN = getenv("BOT_TOKEN")
-
-# MongoDB connection URI (for storing user & session data)
+# ──────────────────────────────────────────────
+# 3. Database (user aur session data yahan save hota hai)
+# ──────────────────────────────────────────────
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
-# YouTube streaming proxy and key (used in API backend)
+# ──────────────────────────────────────────────
+# 4. Owner aur Logger
+# ──────────────────────────────────────────────
+OWNER_ID = int(getenv("OWNER_ID"))      # Aapki Telegram user ID
+LOGGER_ID = int(getenv("LOGGER_ID"))    # Jis chat/group mein logs aayenge uski ID
+
+# ──────────────────────────────────────────────
+# 5. Support aur Community links
+# ──────────────────────────────────────────────
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/heroku_club")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/nobita_support")
+UPDATE_CHANNEL = getenv("UPDATE_CHANNEL", "https://t.me/heroku_club")   # "Channel Update" button
+POLICY_LINK = getenv("POLICY_LINK", "https://telegra.ph/your-policy-page")  # "Policy" button
+
+# ──────────────────────────────────────────────
+# 6. YouTube / Streaming settings
+# ──────────────────────────────────────────────
 YTPROXY_URL = getenv("YTPROXY_URL", "http://80.211.135.205:1470/youtube/")
-YT_API_KEY = getenv("YT_API_KEY", "AIzaSyCNDWhirI16BIMq66vMVsibtSiUQ6swguY")
+YT_API_KEY = getenv("YT_API_KEY", "")            # Key sirf .env mein rakho
+YTDL_COOKIES = getenv("YTDL_COOKIES", "cookies.txt")
+COOKIES_URL = getenv("COOKIES_URL", None)
 DOWNLOADS_DIR = getenv("DOWNLOADS_DIR", "downloads")
 
-BOT_DOCS =  getenv("BOT_DOCS", "https://radha-music.vercel.app")
-MINI_APP =  getenv("MINI_APP", "https://heroku-club.vercel.app")
-
-COOKIES_URL = getenv("COOKIES_URL", None)
-
-# Limits and durations
-DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 300))  # Max duration in minutes
-ASSISTANT_LEAVE_TIME = int(getenv("ASSISTANT_LEAVE_TIME", 5400))  # Time after which assistant leaves (in seconds)
-CACHE_DURATION = int(getenv("CACHE_DURATION", 86400))  # Duration to cache files
-CACHE_SLEEP = int(getenv("CACHE_SLEEP", 3600))  # Interval to clean cache
 ESSE_API_URL = getenv("ESSE_API_URL", "https://esse.skybotsdeveloper.workers.dev")
 ESSE_API_KEY = getenv("ESSE_API_KEY", "")
 ESSE_TIMEOUT = getenv("ESSE_TIMEOUT", "20")
 
-# Logging & ownership
-LOGGER_ID = int(getenv("LOGGER_ID"))  # Chat ID where logs go
-OWNER_ID = int(getenv("OWNER_ID"))    # Your Telegram ID
+# ──────────────────────────────────────────────
+# 7. Spotify (https://developer.spotify.com/dashboard se milte hain)
+# ──────────────────────────────────────────────
+SPOTIFY_CLIENT_ID = getenv("SPOTIFY_CLIENT_ID", "")
+SPOTIFY_CLIENT_SECRET = getenv("SPOTIFY_CLIENT_SECRET", "")
+PLAYLIST_FETCH_LIMIT = int(getenv("PLAYLIST_FETCH_LIMIT", 25))  # Ek baar mein kitne tracks
 
-# Heroku deployment (optional)
-HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
-HEROKU_API_KEY = getenv("HEROKU_API_KEY")
+# ──────────────────────────────────────────────
+# 8. Limits aur Timing
+# ──────────────────────────────────────────────
+DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 300))             # Max song length (minutes)
+ASSISTANT_LEAVE_TIME = int(getenv("ASSISTANT_LEAVE_TIME", 5400))    # Assistant kitne seconds baad leave kare
+CACHE_DURATION = int(getenv("CACHE_DURATION", 86400))               # File cache kitni der rakhni hai (seconds)
+CACHE_SLEEP = int(getenv("CACHE_SLEEP", 3600))                      # Cache safai ka gap (seconds)
 
-# Git repo details (for updates & deployment)
-UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/VNI0X/ANONMUSIC")
-UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "Master")
-GIT_TOKEN = getenv("GIT_TOKEN")  # Only required for private repos
+TG_AUDIO_FILESIZE_LIMIT = int(getenv("TG_AUDIO_FILESIZE_LIMIT", 204857600))    # ~195 MB
+TG_VIDEO_FILESIZE_LIMIT = int(getenv("TG_VIDEO_FILESIZE_LIMIT", 2073741824))   # ~1.93 GB
 
-# Support & community
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/heroku_club")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/nobita_support")
-
-# Assistant auto-leave =Voice Chat and Chat's setting
-AUTO_LEAVING_ASSISTANT = bool(getenv("AUTO_LEAVING_ASSISTANT", False))
-AUTO_END_STREAM = bool(getenv("AUTO_END_STREAM", False))
-
-# Spotify credentials (from https://developer.spotify.com/dashboard)
-SPOTIFY_CLIENT_ID = getenv("SPOTIFY_CLIENT_ID", "22b6125bfe224587b722d6815002db2b")
-SPOTIFY_CLIENT_SECRET = getenv("SPOTIFY_CLIENT_SECRET", "c9c63c6fbf2f467c8bc68624851e9773")
-
-# Playlist track fetch limit
-PLAYLIST_FETCH_LIMIT = int(getenv("PLAYLIST_FETCH_LIMIT", 25))
-
-# File size limits in bytes (check https://www.gbmb.org/mb-to-bytes)
-TG_AUDIO_FILESIZE_LIMIT = int(getenv("TG_AUDIO_FILESIZE_LIMIT", 204857600))  # ~195 MB
-TG_VIDEO_FILESIZE_LIMIT = int(getenv("TG_VIDEO_FILESIZE_LIMIT", 2073741824))  # ~1.93 GB
-
-# Private mode memory limit
 PRIVATE_BOT_MODE_MEM = int(getenv("PRIVATE_BOT_MODE_MEM", 1))
 
-# Pyrogram session strings (get from @SESSIONxGENxBOT)
+# ──────────────────────────────────────────────
+# 9. Assistant ke auto settings (true / false likho)
+# ──────────────────────────────────────────────
+AUTO_LEAVING_ASSISTANT = str_to_bool(getenv("AUTO_LEAVING_ASSISTANT"), False)
+AUTO_END_STREAM = str_to_bool(getenv("AUTO_END_STREAM"), False)
+
+# ──────────────────────────────────────────────
+# 10. Assistant account ke Pyrogram session strings
+# ──────────────────────────────────────────────
 STRING1 = getenv("STRING_SESSION")
 STRING2 = getenv("STRING_SESSION2")
 STRING3 = getenv("STRING_SESSION3")
 STRING4 = getenv("STRING_SESSION4")
 STRING5 = getenv("STRING_SESSION5")
 
-# In-memory bot data and cache
+# ──────────────────────────────────────────────
+# 11. Heroku aur Git (deploy aur update ke liye, optional)
+# ──────────────────────────────────────────────
+HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
+HEROKU_API_KEY = getenv("HEROKU_API_KEY")
+
+UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/VNI0X/ANONMUSIC")
+UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "Master")
+GIT_TOKEN = getenv("GIT_TOKEN")  # Sirf private repo ke liye
+
+# ──────────────────────────────────────────────
+# 12. Bot ke andar use hone wala temporary data (memory mein)
+# ──────────────────────────────────────────────
 BANNED_USERS = filters.user()
 adminlist = {}
 lyrical = {}
@@ -91,14 +112,9 @@ autoclean = []
 confirmer = {}
 file_cache: dict[str, float] = {}
 
-# Bot images used in replies and menus
-START_IMG_URLS = [
-    "https://litter.catbox.moe/ja82tm.mp4",
-    "https://litter.catbox.moe/ja82tm.mp4",
-    "https://litter.catbox.moe/ja82tm.mp4",
-    
-]
-
+# ──────────────────────────────────────────────
+# 13. Images / Videos jo bot ke messages mein dikhte hain
+# ──────────────────────────────────────────────
 START_IMG_URL = getenv("START_IMG_URL", "https://litter.catbox.moe/ja82tm.mp4")
 PING_IMG_URL = getenv("PING_IMG_URL", "https://files.catbox.moe/x3a3nc.jpg")
 PLAYLIST_IMG_URL = getenv("PLAYLIST_IMG_URL", "https://files.catbox.moe/v7u8ji.jpg")
@@ -112,16 +128,26 @@ SPOTIFY_ARTIST_IMG_URL = getenv("SPOTIFY_ARTIST_IMG_URL", "https://files.catbox.
 SPOTIFY_ALBUM_IMG_URL = getenv("SPOTIFY_ALBUM_IMG_URL", "https://files.catbox.moe/66ye0m.jpg")
 SPOTIFY_PLAYLIST_IMG_URL = getenv("SPOTIFY_PLAYLIST_IMG_URL", "https://files.catbox.moe/66ye0m.jpg")
 
-# Convert time (hh:mm:ss) to seconds
+
+# ──────────────────────────────────────────────
+# 14. Helper: "hh:mm:ss" ko seconds mein badalta hai
+# ──────────────────────────────────────────────
 def time_to_seconds(time: str) -> int:
     return sum(int(x) * 60 ** i for i, x in enumerate(reversed(time.split(":"))))
 
-# Duration limit in seconds
-DURATION_LIMIT = time_to_seconds(f"{DURATION_LIMIT_MIN}:00")
 
-# Validate URLs for support links
-if SUPPORT_CHANNEL and not re.match(r"^(?:http|https)://", SUPPORT_CHANNEL):
-    raise SystemExit("[ERROR] - SUPPORT_CHANNEL URL must start with http/https.")
+DURATION_LIMIT = time_to_seconds(f"{DURATION_LIMIT_MIN}:00")  # Limit seconds mein
 
-if SUPPORT_CHAT and not re.match(r"^(?:http|https)://", SUPPORT_CHAT):
-    raise SystemExit("[ERROR] - SUPPORT_CHAT URL must start with http/https.")
+
+# ──────────────────────────────────────────────
+# 15. Links check: sab http:// ya https:// se shuru hone chahiye
+# ──────────────────────────────────────────────
+def validate_url(name: str, value: str):
+    if value and not re.match(r"^(?:http|https)://", value):
+        raise SystemExit(f"[ERROR] - {name} URL must start with http/https.")
+
+
+validate_url("SUPPORT_CHANNEL", SUPPORT_CHANNEL)
+validate_url("SUPPORT_CHAT", SUPPORT_CHAT)
+validate_url("UPDATE_CHANNEL", UPDATE_CHANNEL)
+validate_url("POLICY_LINK", POLICY_LINK)
