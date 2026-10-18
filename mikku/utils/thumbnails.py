@@ -1,5 +1,6 @@
 import os
 import re
+import math
 import aiofiles
 import aiohttp
 import logging
@@ -8,43 +9,44 @@ from youtubesearchpython.__future__ import VideosSearch
 from config import YOUTUBE_IMG_URL
 from mikku import app
 
-# Logging Setup
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Directories
 CACHE_DIR = "cache"
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-# Layout Constants
-PANEL_W, PANEL_H = 800, 600
-PANEL_X = (1280 - PANEL_W) // 2
-PANEL_Y = 50
-TRANSPARENCY = 180
-INNER_OFFSET = 40
+FONT_BOLD = "mikku/assets/thumb/font2.ttf"
+FONT_REG = "mikku/assets/thumb/font.ttf"
 
-THUMB_W, THUMB_H = 600, 300
-THUMB_X = PANEL_X + (PANEL_W - THUMB_W) // 2
-THUMB_Y = PANEL_Y + INNER_OFFSET
+# ---------- Layout ----------
+W, H = 1280, 720
 
-TITLE_X = THUMB_X
-META_X = THUMB_X
-TITLE_Y = THUMB_Y + THUMB_H + 20
-META_Y = TITLE_Y + 50
+CARD_W, CARD_H = 1000, 360
+CARD_X = (W - CARD_W) // 2
+CARD_Y = 150
+CARD_R = 70
 
-BAR_X, BAR_Y = THUMB_X, META_Y + 40
-BAR_RED_LEN = 300
-BAR_TOTAL_LEN = 600
+ART = 260
+ART_X = CARD_X + 45
+ART_Y = CARD_Y + (CARD_H - ART) // 2
+ART_R = 30
 
-ICONS_W, ICONS_H = 450, 60
-ICONS_X = PANEL_X + (PANEL_W - ICONS_W) // 2
-ICONS_Y = BAR_Y + 60
+TEXT_X = ART_X + ART + 50
+TEXT_MAX_W = CARD_X + CARD_W - 60 - TEXT_X
 
-MAX_TITLE_WIDTH = PANEL_W - 100
+LABEL_COLOR = (200, 215, 235, 255)      # "NOW PLAYING" / artist (light blue-grey)
+WHITE = (255, 255, 255, 255)
 
 
-def trim_to_width(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> str:
+def load_font(path, size):
+    try:
+        return ImageFont.truetype(path, size)
+    except Exception:
+        return ImageFont.load_default()
+
+
+def trim_to_width(text: str, font, max_w: int) -> str:
     ellipsis = "…"
-    text = text[:50]  # Limit title to 50 characters
+    text = text[:50]
     if font.getlength(text) <= max_w:
         return text
     for i in range(len(text) - 1, 0, -1):
@@ -53,8 +55,47 @@ def trim_to_width(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> str:
     return ellipsis
 
 
+def spaced_text(draw, xy, text, font, fill, spacing=3):
+    x, y = xy
+    for ch in text:
+        draw.text((x, y), ch, font=font, fill=fill)
+        x += font.getlength(ch) + spacing
+    return x
+
+
+def draw_star(draw, cx, cy, r, fill):
+    pts = []
+    for i in range(10):
+        ang = -math.pi / 2 + i * math.pi / 5
+        rad = r if i % 2 == 0 else r * 0.45
+        pts.append((cx + rad * math.cos(ang), cy + rad * math.sin(ang)))
+    draw.polygon(pts, fill=fill)
+
+
+def draw_music_note(draw, x, y, fill=WHITE):
+    draw.ellipse((x, y + 34, x + 18, y + 50), fill=fill)
+    draw.ellipse((x + 28, y + 28, x + 46, y + 44), fill=fill)
+    draw.rectangle((x + 14, y + 8, x + 18, y + 42), fill=fill)
+    draw.rectangle((x + 42, y + 2, x + 46, y + 36), fill=fill)
+    draw.polygon([(x + 14, y + 8), (x + 46, y + 2), (x + 46, y + 14), (x + 14, y + 20)], fill=fill)
+
+
+def rounded_mask(size, radius):
+    m = Image.new("L", size, 0)
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius, fill=255)
+    return m
+
+
+def vertical_gradient(size, top, bottom):
+    w, h = size
+    top_img = Image.new("RGBA", size, top)
+    bot_img = Image.new("RGBA", size, bottom)
+    mask = Image.linear_gradient("L").resize((w, h))
+    return Image.composite(bot_img, top_img, mask)
+
+
 async def get_thumb(videoid: str) -> str:
-    cache_path = os.path.join(CACHE_DIR, f"{videoid}_v5.png")
+    cache_path = os.path.join(CACHE_DIR, f"{videoid}_v6.png")
     if os.path.exists(cache_path):
         return cache_path
 
@@ -66,12 +107,14 @@ async def get_thumb(videoid: str) -> str:
         thumbnail = data.get("thumbnails", [{}])[0].get("url", YOUTUBE_IMG_URL)
         duration = data.get("duration")
         views = data.get("viewCount", {}).get("short", "Unknown Views")
+        channel = (data.get("channel") or {}).get("name", "Unknown Artist")
     except Exception as e:
         logging.error(f"Error fetching YouTube data: {e}")
         title, thumbnail, duration, views = "Unsupported Title", YOUTUBE_IMG_URL, None, "Unknown Views"
+        channel = "Unknown Artist"
 
     is_live = not duration or str(duration).strip().lower() in {"", "live", "live now"}
-    duration_text = "🔴 LIVE" if is_live else duration or "Unknown Mins"
+    duration_text = "LIVE" if is_live else duration
 
     thumb_path = os.path.join(CACHE_DIR, f"thumb_{videoid}.jpg")
     try:
@@ -88,96 +131,126 @@ async def get_thumb(videoid: str) -> str:
         return YOUTUBE_IMG_URL
 
     try:
-        base = Image.open(thumb_path).resize((1280, 720)).convert("RGBA")
-        bg = ImageEnhance.Brightness(base.filter(ImageFilter.GaussianBlur(15))).enhance(0.5)
+        base = Image.open(thumb_path).convert("RGBA")
+        bg_src = base.resize((W, H))
+        bg = ImageEnhance.Brightness(bg_src.filter(ImageFilter.GaussianBlur(30))).enhance(0.55)
+        bg = ImageEnhance.Color(bg).enhance(1.2)
     except Exception as e:
         logging.error(f"Image processing error: {e}")
         return YOUTUBE_IMG_URL
 
-    # Frosted Gradient Panel
+    # ---------- Card shadow ----------
     try:
-        panel_area = bg.crop((PANEL_X, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + PANEL_H))
-        gradient = Image.new("RGBA", (PANEL_W, PANEL_H), color=0)
-        for y in range(PANEL_H):
-            r = 255
-            g = 255 - int((y / PANEL_H) * 80)
-            b = 255 - int((y / PANEL_H) * 120)
-            a = TRANSPARENCY
-            for x in range(PANEL_W):
-                gradient.putpixel((x, y), (r, g, b, a))
-        frosted = Image.alpha_composite(panel_area, gradient)
-        mask = Image.new("L", (PANEL_W, PANEL_H), 0)
-        ImageDraw.Draw(mask).rounded_rectangle((0, 0, PANEL_W, PANEL_H), 35, fill=255)
-        bg.paste(frosted, (PANEL_X, PANEL_Y), mask)
+        shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        ImageDraw.Draw(shadow).rounded_rectangle(
+            (CARD_X, CARD_Y + 18, CARD_X + CARD_W, CARD_Y + CARD_H + 18),
+            CARD_R, fill=(0, 0, 0, 140))
+        shadow = shadow.filter(ImageFilter.GaussianBlur(28))
+        bg = Image.alpha_composite(bg, shadow)
     except Exception as e:
-        logging.error(f"Panel error: {e}")
+        logging.error(f"Shadow error: {e}")
 
-    # Thumbnail with Border
+    # ---------- Glass card ----------
     try:
-        thumb = ImageOps.fit(base, (THUMB_W, THUMB_H), method=Image.Resampling.LANCZOS)
-        tmask = Image.new("L", thumb.size, 0)
-        ImageDraw.Draw(tmask).rounded_rectangle((0, 0, THUMB_W, THUMB_H), 25, fill=255)
+        area = bg.crop((CARD_X, CARD_Y, CARD_X + CARD_W, CARD_Y + CARD_H))
+        area = area.filter(ImageFilter.GaussianBlur(10))
+        tint = vertical_gradient((CARD_W, CARD_H), (95, 120, 150, 150), (30, 45, 70, 215))
+        glass = Image.alpha_composite(area, tint)
 
-        border = Image.new("RGBA", (THUMB_W + 10, THUMB_H + 10), (0, 0, 0, 0))
-        bmask = Image.new("L", (THUMB_W + 10, THUMB_H + 10), 0)
-        ImageDraw.Draw(bmask).rounded_rectangle((0, 0, THUMB_W + 10, THUMB_H + 10), 30, fill=255)
+        # top shine
+        shine = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+        ImageDraw.Draw(shine).ellipse((-200, -CARD_H, CARD_W + 200, CARD_H // 2),
+                                      fill=(255, 255, 255, 22))
+        glass = Image.alpha_composite(glass, shine)
 
-        bg.paste(border, (THUMB_X - 5, THUMB_Y - 5), bmask)
-        bg.paste(thumb, (THUMB_X, THUMB_Y), tmask)
+        # border
+        border = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0))
+        ImageDraw.Draw(border).rounded_rectangle((0, 0, CARD_W - 1, CARD_H - 1), CARD_R,
+                                                 outline=(255, 255, 255, 90), width=2)
+        glass = Image.alpha_composite(glass, border)
+
+        bg.paste(glass, (CARD_X, CARD_Y), rounded_mask((CARD_W, CARD_H), CARD_R))
     except Exception as e:
-        logging.error(f"Thumbnail error: {e}")
+        logging.error(f"Card error: {e}")
 
+    # ---------- Album art ----------
     try:
-        title_font = ImageFont.truetype("mikku/assets/thumb/font2.ttf", 30)
-        meta_font = ImageFont.truetype("mikku/assets/thumb/font.ttf", 22)
-        draw = ImageDraw.Draw(bg)
+        art_shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        ImageDraw.Draw(art_shadow).rounded_rectangle(
+            (ART_X, ART_Y + 10, ART_X + ART, ART_Y + ART + 10), ART_R, fill=(0, 0, 0, 150))
+        art_shadow = art_shadow.filter(ImageFilter.GaussianBlur(14))
+        bg = Image.alpha_composite(bg, art_shadow)
 
-        title_text = trim_to_width(title, title_font, MAX_TITLE_WIDTH)
-        draw.text((TITLE_X, TITLE_Y), title_text, fill="white", font=title_font)
+        art = ImageOps.fit(base, (ART, ART), method=Image.Resampling.LANCZOS)
+        bg.paste(art, (ART_X, ART_Y), rounded_mask((ART, ART), ART_R))
+    except Exception as e:
+        logging.error(f"Art error: {e}")
 
-        draw.text((META_X, META_Y), f"YouTube | {views}           Player : @{app.username}", fill="#FF0000", font=meta_font)
+    # ---------- UI layer (text, pill, icons) ----------
+    try:
+        ui = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        d = ImageDraw.Draw(ui)
 
+        small_font = load_font(FONT_REG, 26)
+        title_font = load_font(FONT_BOLD, 50)
+        artist_font = load_font(FONT_REG, 38)
+        pill_font = load_font(FONT_BOLD, 32)
+        meta_font = load_font(FONT_REG, 24)
+        label_font = load_font(FONT_REG, 28)
+
+        # NOW PLAYING
+        spaced_text(d, (TEXT_X, CARD_Y + 52), "NOW PLAYING", small_font, LABEL_COLOR, spacing=3)
+
+        # Title + star
+        title_text = trim_to_width(title, title_font, TEXT_MAX_W - 50)
+        ty = CARD_Y + 92
+        d.text((TEXT_X, ty), title_text, font=title_font, fill=WHITE)
+        tw = title_font.getlength(title_text)
+        draw_star(d, TEXT_X + tw + 28, ty + 33, 13, (190, 200, 215, 255))
+
+        # Artist / channel
+        artist_text = trim_to_width(channel, artist_font, TEXT_MAX_W)
+        d.text((TEXT_X, CARD_Y + 164), artist_text, font=artist_font, fill=LABEL_COLOR)
+
+        # Play pill
+        pill_w, pill_h = 210, 72
+        px, py = TEXT_X, CARD_Y + 238
+        d.rounded_rectangle((px, py, px + pill_w, py + pill_h), pill_h // 2,
+                            fill=(255, 255, 255, 55))
+        cy = py + pill_h // 2
+        d.polygon([(px + 32, cy - 15), (px + 32, cy + 15), (px + 58, cy)], fill=WHITE)
+        d.text((px + 78, cy - 20), "Play", font=pill_font, fill=WHITE)
+
+        # views | duration next to pill
+        mx = px + pill_w + 28
         if is_live:
-            live_font = ImageFont.truetype("mikku/assets/thumb/font2.ttf", 22)
-            draw.ellipse((META_X + 200, META_Y - 5, META_X + 225, META_Y + 20), fill=(255, 0, 0, 255))
-            draw.text((META_X + 230, META_Y), "LIVE", fill="red", font=live_font)
+            d.ellipse((mx, cy - 8, mx + 16, cy + 8), fill=(255, 59, 48, 255))
+            d.text((mx + 26, cy - 15), "LIVE", font=meta_font, fill=(255, 90, 80, 255))
+            d.text((mx + 100, cy - 15), f"|  {views}", font=meta_font, fill=LABEL_COLOR)
+        else:
+            d.text((mx, cy - 15), f"{duration_text}  |  {views}", font=meta_font, fill=LABEL_COLOR)
+
+        # Music note (top-right)
+        draw_music_note(d, CARD_X + CARD_W - 105, CARD_Y + 38)
+
+        # Bottom label
+        label = f"Music  •  @{app.username}"
+        lw = label_font.getlength(label)
+        d.text(((W - lw) / 2, CARD_Y + CARD_H + 28), label, font=label_font,
+               fill=(235, 240, 250, 255))
+
+        bg = Image.alpha_composite(bg, ui)
     except Exception as e:
         logging.error(f"Text rendering error: {e}")
 
-    # Progress Bar
-    try:
-        draw.line([(BAR_X, BAR_Y), (BAR_X + BAR_RED_LEN, BAR_Y)], fill="#FF0000", width=10)
-        draw.ellipse([(BAR_X - 5, BAR_Y - 5), (BAR_X + 5, BAR_Y + 5)], fill="#FF0000")
-        draw.line([(BAR_X + BAR_RED_LEN, BAR_Y), (BAR_X + BAR_TOTAL_LEN, BAR_Y)], fill="#555555", width=6)
-        draw.ellipse([(BAR_X + BAR_TOTAL_LEN - 5, BAR_Y - 5), (BAR_X + BAR_TOTAL_LEN + 5, BAR_Y + 5)], fill="#555555")
-
-        draw.text((BAR_X, BAR_Y + 20), "00:00", fill="white", font=meta_font)
-        draw.text((BAR_X + BAR_TOTAL_LEN - 100, BAR_Y + 20), duration_text,
-                  fill="#FF0000" if is_live else "white", font=meta_font)
-    except Exception as e:
-        logging.error(f"Progress bar error: {e}")
-
-    # Icons
-    try:
-        icons_path = "mikku/assets/thumb/play_icons.png"
-        if os.path.isfile(icons_path):
-            icons = Image.open(icons_path).resize((ICONS_W, ICONS_H)).convert("RGBA")
-        else:
-            icons = Image.new("RGBA", (ICONS_W, ICONS_H), (0, 0, 0, 0))
-            d = ImageDraw.Draw(icons)
-            d.polygon([(20, 10), (20, 50), (60, 30)], fill="white")
-        bg.paste(icons, (ICONS_X, ICONS_Y), icons)
-    except Exception as e:
-        logging.error(f"Icons error: {e}")
-
-    # Save and Cleanup
+    # ---------- Save & cleanup ----------
     try:
         os.remove(thumb_path)
     except Exception as e:
         logging.error(f"Cleanup error: {e}")
 
     try:
-        bg.save(cache_path, quality=95)
+        bg.convert("RGB").save(cache_path, quality=95)
         return cache_path
     except Exception as e:
         logging.error(f"Save error: {e}")
