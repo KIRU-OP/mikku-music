@@ -97,7 +97,7 @@ STRING5 = getenv("STRING_SESSION5")
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
-UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/VNI0X/ANONMUSIC")
+UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/KIRU-OP/mikku-music")
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "Master")
 GIT_TOKEN = getenv("GIT_TOKEN")  # Sirf private repo ke liye
 
@@ -116,17 +116,17 @@ file_cache: dict[str, float] = {}
 # 13. Images / Videos jo bot ke messages mein dikhte hain
 # ──────────────────────────────────────────────
 START_IMG_URL = getenv("START_IMG_URL", "https://litter.catbox.moe/ja82tm.mp4")
-PING_IMG_URL = getenv("PING_IMG_URL", "https://files.catbox.moe/x3a3nc.jpg")
-PLAYLIST_IMG_URL = getenv("PLAYLIST_IMG_URL", "https://files.catbox.moe/v7u8ji.jpg")
-STATS_IMG_URL = getenv("STATS_IMG_URL", "https://files.catbox.moe/7g7j9f.jpg")
+PING_IMG_URL = getenv("PING_IMG_URL", "https://litter.catbox.moe/sww1by.jpg")
+PLAYLIST_IMG_URL = getenv("PLAYLIST_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+STATS_IMG_URL = getenv("STATS_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
 TELEGRAM_AUDIO_URL = getenv("TELEGRAM_AUDIO_URL", "https://files.catbox.moe/fahcob.jpg")
-TELEGRAM_VIDEO_URL = getenv("TELEGRAM_VIDEO_URL", "https://files.catbox.moe/gy14qk.jpg")
-STREAM_IMG_URL = getenv("STREAM_IMG_URL", "https://files.catbox.moe/h0m0wz.jpg")
-SOUNCLOUD_IMG_URL = getenv("SOUNCLOUD_IMG_URL", "https://files.catbox.moe/ieduw9.jpg")
-YOUTUBE_IMG_URL = getenv("YOUTUBE_IMG_URL", "https://files.catbox.moe/rnwmfw.jpg")
-SPOTIFY_ARTIST_IMG_URL = getenv("SPOTIFY_ARTIST_IMG_URL", "https://files.catbox.moe/66ye0m.jpg")
-SPOTIFY_ALBUM_IMG_URL = getenv("SPOTIFY_ALBUM_IMG_URL", "https://files.catbox.moe/66ye0m.jpg")
-SPOTIFY_PLAYLIST_IMG_URL = getenv("SPOTIFY_PLAYLIST_IMG_URL", "https://files.catbox.moe/66ye0m.jpg")
+TELEGRAM_VIDEO_URL = getenv("TELEGRAM_VIDEO_URL", "https://litter.catbox.moe/0pizzr.jpg")
+STREAM_IMG_URL = getenv("STREAM_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+SOUNCLOUD_IMG_URL = getenv("SOUNCLOUD_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+YOUTUBE_IMG_URL = getenv("YOUTUBE_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+SPOTIFY_ARTIST_IMG_URL = getenv("SPOTIFY_ARTIST_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+SPOTIFY_ALBUM_IMG_URL = getenv("SPOTIFY_ALBUM_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
+SPOTIFY_PLAYLIST_IMG_URL = getenv("SPOTIFY_PLAYLIST_IMG_URL", "https://litter.catbox.moe/0pizzr.jpg")
 
 
 # ──────────────────────────────────────────────
