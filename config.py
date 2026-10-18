@@ -41,7 +41,7 @@ LOGGER_ID = int(getenv("LOGGER_ID"))    # Jis chat/group mein logs aayenge uski 
 SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_deadly_venom")
 SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/group_voice_chat")
 UPDATE_CHANNEL = getenv("UPDATE_CHANNEL", "https://t.me/NEXO_BOT_SUPPORT")   # "Channel Update" button
-POLICY_LINK = getenv("POLICY_LINK", "https://venom-profile.shivampatel425685.workers.dev/)  # "Policy" button
+POLICY_LINK = getenv("POLICY_LINK", "https://venom-profile.shivampatel425685.workers.dev/")  # "Policy" button
 
 # ──────────────────────────────────────────────
 # 6. YouTube / Streaming settings
