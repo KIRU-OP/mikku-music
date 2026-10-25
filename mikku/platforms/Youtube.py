@@ -906,6 +906,15 @@ class YouTubeAPI:
                     session.close()
 
         async def download_from_source(url, filepath, headers=None):
+            # Links from our own Worker are plain files: yt-dlp adds nothing and doubles the load on the Worker
+            # (each hit makes it ask YouTube again, which triggers the bot check). Use requests with retries.
+            if WORKER_FALLBACK_API_URL and str(url).startswith(WORKER_FALLBACK_API_URL.rstrip("/")):
+                for attempt in range(3):
+                    result = await download_with_requests_fallback(url, filepath, headers)
+                    if result:
+                        return result
+                    await asyncio.sleep(2 * (attempt + 1))
+                return None
             result = await download_with_ytdlp(url, filepath, headers)
             if result:
                 return result
