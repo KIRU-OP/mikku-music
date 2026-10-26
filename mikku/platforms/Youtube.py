@@ -43,9 +43,6 @@ WORKER_FALLBACK_API_KEY = os.getenv("WORKER_FALLBACK_API_KEY", "kiru-ops").strip
 YTPROXY = (YTPROXY_URL or "").strip().rstrip("/")
 YT_API_KEY = (YT_API_KEY or "").strip()
 MIN_CACHED_MEDIA_BYTES = 128 * 1024
-# Download straight from YouTube on THIS server first (one IP for the link and the file, so no 403).
-# YTDLP_DIRECT=0 turns it off. YTDLP_COOKIES_FILE=/path/cookies.txt (optional) helps when YouTube asks to sign in.
-YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "cookies.txt").strip()
 DOWNLOAD_CACHE_EXTENSIONS = (".m4a", ".mp3", ".mp4", ".webm")
 
 
@@ -908,79 +905,7 @@ class YouTubeAPI:
                 if session:
                     session.close()
 
-        def ytdlp_direct_opts(media_type, temp_filepath=None):
-            opts = {
-                "quiet": True,
-                "no_warnings": True,
-                "noprogress": True,
-                "retries": 3,
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "format": (
-                    "best[height<=?720][ext=mp4]/best[height<=?720]/best"
-                    if media_type == "video"
-                    else "bestaudio[ext=m4a]/bestaudio/best"
-                ),
-            }
-            if temp_filepath:
-                opts.update({"outtmpl": temp_filepath, "force_overwrites": True, "nopart": True})
-            if YTDLP_COOKIES_FILE and os.path.isfile(YTDLP_COOKIES_FILE):
-                opts["cookiefile"] = YTDLP_COOKIES_FILE
-            return opts
-
-        async def ytdlp_direct_download(vid_id, filepath, media_type):
-            """Download from YouTube with yt-dlp on this server. Returns filepath or None."""
-            if not bool_env("YTDLP_DIRECT", True):
-                return None
-            temp_filepath = partial_path(filepath)
-
-            def run():
-                with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type, temp_filepath)) as ydl:
-                    ydl.download([f"https://www.youtube.com/watch?v={vid_id}"])
-
-            try:
-                if os.path.exists(temp_filepath):
-                    os.remove(temp_filepath)
-                await loop.run_in_executor(None, run)
-                if os.path.exists(temp_filepath) and os.path.getsize(temp_filepath) >= MIN_CACHED_MEDIA_BYTES:
-                    os.replace(temp_filepath, filepath)
-                    return filepath
-            except Exception as e:
-                logger.warning("yt-dlp direct download failed | video_id=%s | reason=%s", vid_id, str(e)[:200])
-            if os.path.exists(temp_filepath):
-                try:
-                    os.remove(temp_filepath)
-                except Exception:
-                    pass
-            return None
-
-        async def ytdlp_direct_stream_url(vid_id, media_type):
-            """Ask yt-dlp for a playable URL. It is bound to this server's IP, which is also who plays it."""
-            if not bool_env("YTDLP_DIRECT", True):
-                return None
-
-            def run():
-                with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type)) as ydl:
-                    info = ydl.extract_info(f"https://www.youtube.com/watch?v={vid_id}", download=False)
-                    return info.get("url")
-
-            try:
-                return await loop.run_in_executor(None, run)
-            except Exception as e:
-                logger.warning("yt-dlp direct url failed | video_id=%s | reason=%s", vid_id, str(e)[:200])
-                return None
-
         async def download_from_source(url, filepath, headers=None):
-            # Links from our own Worker are plain files: yt-dlp adds nothing and doubles the load on the Worker
-            # (each hit makes it ask YouTube again, which triggers the bot check). Use requests with retries.
-            if WORKER_FALLBACK_API_URL and str(url).startswith(WORKER_FALLBACK_API_URL.rstrip("/")):
-                for attempt, wait in enumerate((0, 4, 8, 15, 25)):
-                    if wait:
-                        await asyncio.sleep(wait)
-                    result = await download_with_requests_fallback(url, filepath, headers)
-                    if result:
-                        return result
-                return None
             result = await download_with_ytdlp(url, filepath, headers)
             if result:
                 return result
@@ -1111,7 +1036,6 @@ class YouTubeAPI:
             state = "OK" if ok else "FAILED"
             pretty_sources = {
                 "LOCAL CACHE": "local cache",
-                "YT-DLP DIRECT": "yt-dlp direct",
                 "WORKER PRIMARY": "worker primary",
                 "WORKER FALLBACK": "worker fallback",
                 "XBIT FALLBACK": "xBit fallback",
@@ -1269,17 +1193,6 @@ class YouTubeAPI:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
 
-            if stream:
-                direct_url = await ytdlp_direct_stream_url(vid_id, "audio")
-                if direct_url and await validate_stream_source(direct_url):
-                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
-                    return direct_url, False
-            else:
-                result = await ytdlp_direct_download(vid_id, filepath, "audio")
-                if result:
-                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
-                    return result, True
-
             worker_audio = await get_worker_fallback_links(vid_id, "mp3")
             if worker_audio:
                 worker_audio_url = worker_audio.get("play_url")
@@ -1367,17 +1280,6 @@ class YouTubeAPI:
                 "x-api-key": f"{YT_API_KEY}",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
-
-            if stream:
-                direct_url = await ytdlp_direct_stream_url(vid_id, "video")
-                if direct_url and await validate_stream_source(direct_url):
-                    mark_source(vid_id, "video", "YT-DLP DIRECT")
-                    return direct_url, False
-            else:
-                result = await ytdlp_direct_download(vid_id, filepath, "video")
-                if result:
-                    mark_source(vid_id, "video", "YT-DLP DIRECT")
-                    return result, True
 
             worker_video = await get_worker_fallback_links(vid_id, "mp4")
             if worker_video:
