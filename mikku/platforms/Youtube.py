@@ -47,6 +47,8 @@ MIN_CACHED_MEDIA_BYTES = 128 * 1024
 # YTDLP_DIRECT=0 turns it off. YTDLP_COOKIES_FILE=/path/cookies.txt (optional) helps when YouTube asks to sign in.
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "cookies.txt").strip()
 DOWNLOAD_CACHE_EXTENSIONS = (".m4a", ".mp3", ".mp4", ".webm")
+# Cached songs older than this are deleted automatically (hours). 0 turns the age rule off.
+DOWNLOAD_CACHE_MAX_AGE_HOURS = max(0, int(os.getenv("DOWNLOAD_CACHE_MAX_AGE_HOURS", "12") or 0))
 
 
 def int_env(name: str, default: int) -> int:
@@ -834,6 +836,55 @@ class YouTubeAPI:
                 )
             )
 
+        def make_room_on_disk(extra_mb=60):
+            """Delete old cached songs when the disk is nearly full (never the ones playing or queued)."""
+            try:
+                os.makedirs("downloads", exist_ok=True)
+                protected_now = {os.path.abspath(str(p)) for p in autoclean if isinstance(p, str) and p}
+                protected_now.update(
+                    os.path.abspath(path)
+                    for path, task in self._background_cache_tasks.items()
+                    if task and not task.done()
+                )
+                if DOWNLOAD_CACHE_MAX_AGE_HOURS:
+                    cutoff = time.time() - DOWNLOAD_CACHE_MAX_AGE_HOURS * 3600
+                    removed_old = 0
+                    for entry in os.scandir("downloads"):
+                        try:
+                            if (
+                                entry.is_file()
+                                and entry.name.lower().endswith(DOWNLOAD_CACHE_EXTENSIONS + (".downloading",))
+                                and entry.stat().st_mtime < cutoff
+                                and os.path.abspath(entry.path) not in protected_now
+                            ):
+                                os.remove(entry.path)
+                                removed_old += 1
+                        except OSError:
+                            continue
+                    if removed_old:
+                        logger.info("Auto-clean removed %s old cached file(s).", removed_old)
+                enforce_download_cache_budget(extra_mb * 1024 * 1024)
+                free = shutil.disk_usage("downloads").free
+                if free < (extra_mb + 100) * 1024 * 1024:
+                    # still tight: drop the oldest unprotected cache files until there is room
+                    protected = {os.path.abspath(str(p)) for p in autoclean if isinstance(p, str) and p}
+                    files = sorted(
+                        (e for e in os.scandir("downloads")
+                         if e.is_file() and e.name.lower().endswith(DOWNLOAD_CACHE_EXTENSIONS + (".downloading",))),
+                        key=lambda e: e.stat().st_mtime,
+                    )
+                    for entry in files:
+                        if os.path.abspath(entry.path) in protected:
+                            continue
+                        try:
+                            os.remove(entry.path)
+                        except OSError:
+                            continue
+                        if shutil.disk_usage("downloads").free >= (extra_mb + 200) * 1024 * 1024:
+                            break
+            except Exception as exc:
+                logger.warning("make_room_on_disk failed: %s", exc)
+
         async def download_with_ytdlp(url, filepath, headers=None, max_retries=3):
             default_headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
@@ -903,12 +954,14 @@ class YouTubeAPI:
                 logger.error(f"Requests download failed: {str(e)}")
                 if os.path.exists(temp_filepath):
                     os.remove(temp_filepath)
+                if getattr(e, "errno", None) == 28:
+                    make_room_on_disk(200)
                 return None
             finally:
                 if session:
                     session.close()
 
-        def ytdlp_direct_opts(media_type, temp_filepath=None):
+        def ytdlp_direct_opts(media_type, temp_filepath=None, client=None):
             opts = {
                 "quiet": True,
                 "no_warnings": True,
@@ -924,6 +977,8 @@ class YouTubeAPI:
             }
             if temp_filepath:
                 opts.update({"outtmpl": temp_filepath, "force_overwrites": True, "nopart": True})
+            if client:
+                opts["extractor_args"] = {"youtube": {"player_client": [client]}}
             if YTDLP_COOKIES_FILE and os.path.isfile(YTDLP_COOKIES_FILE):
                 opts["cookiefile"] = YTDLP_COOKIES_FILE
             return opts
@@ -935,8 +990,16 @@ class YouTubeAPI:
             temp_filepath = partial_path(filepath)
 
             def run():
-                with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type, temp_filepath)) as ydl:
-                    ydl.download([f"https://www.youtube.com/watch?v={vid_id}"])
+                last = None
+                # android_vr needs neither cookies nor a PO token; then the normal clients
+                for client in ("android_vr", None):
+                    try:
+                        with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type, temp_filepath, client)) as ydl:
+                            ydl.download([f"https://www.youtube.com/watch?v={vid_id}"])
+                        return
+                    except Exception as e:
+                        last = e
+                raise last
 
             try:
                 if os.path.exists(temp_filepath):
@@ -960,9 +1023,18 @@ class YouTubeAPI:
                 return None
 
             def run():
-                with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type)) as ydl:
-                    info = ydl.extract_info(f"https://www.youtube.com/watch?v={vid_id}", download=False)
-                    return info.get("url")
+                last = None
+                for client in ("android_vr", None):
+                    try:
+                        with yt_dlp.YoutubeDL(ytdlp_direct_opts(media_type, None, client)) as ydl:
+                            info = ydl.extract_info(f"https://www.youtube.com/watch?v={vid_id}", download=False)
+                            if info.get("url"):
+                                return info.get("url")
+                    except Exception as e:
+                        last = e
+                if last:
+                    raise last
+                return None
 
             try:
                 return await loop.run_in_executor(None, run)
@@ -974,7 +1046,7 @@ class YouTubeAPI:
             # Links from our own Worker are plain files: yt-dlp adds nothing and doubles the load on the Worker
             # (each hit makes it ask YouTube again, which triggers the bot check). Use requests with retries.
             if WORKER_FALLBACK_API_URL and str(url).startswith(WORKER_FALLBACK_API_URL.rstrip("/")):
-                for attempt, wait in enumerate((0, 4, 8, 15, 25)):
+                for attempt, wait in enumerate((0, 6)):
                     if wait:
                         await asyncio.sleep(wait)
                     result = await download_with_requests_fallback(url, filepath, headers)
@@ -1269,17 +1341,8 @@ class YouTubeAPI:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
 
-            if stream:
-                direct_url = await ytdlp_direct_stream_url(vid_id, "audio")
-                if direct_url and await validate_stream_source(direct_url):
-                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
-                    return direct_url, False
-            else:
-                result = await ytdlp_direct_download(vid_id, filepath, "audio")
-                if result:
-                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
-                    return result, True
-
+            if not stream:
+                make_room_on_disk()
             worker_audio = await get_worker_fallback_links(vid_id, "mp3")
             if worker_audio:
                 worker_audio_url = worker_audio.get("play_url")
@@ -1293,6 +1356,17 @@ class YouTubeAPI:
                     mark_source(vid_id, "audio", "WORKER PRIMARY")
                     return result, True
                 logger.warning("Worker audio URL download failed, trying xBit fallback.")
+
+            if stream:
+                direct_url = await ytdlp_direct_stream_url(vid_id, "audio")
+                if direct_url and await validate_stream_source(direct_url):
+                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
+                    return direct_url, False
+            else:
+                result = await ytdlp_direct_download(vid_id, filepath, "audio")
+                if result:
+                    mark_source(vid_id, "audio", "YT-DLP DIRECT")
+                    return result, True
 
             xbit_audio_url = None
             if YT_API_KEY and YTPROXY:
@@ -1368,17 +1442,8 @@ class YouTubeAPI:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
 
-            if stream:
-                direct_url = await ytdlp_direct_stream_url(vid_id, "video")
-                if direct_url and await validate_stream_source(direct_url):
-                    mark_source(vid_id, "video", "YT-DLP DIRECT")
-                    return direct_url, False
-            else:
-                result = await ytdlp_direct_download(vid_id, filepath, "video")
-                if result:
-                    mark_source(vid_id, "video", "YT-DLP DIRECT")
-                    return result, True
-
+            if not stream:
+                make_room_on_disk()
             worker_video = await get_worker_fallback_links(vid_id, "mp4")
             if worker_video:
                 worker_video_url = worker_video.get("play_url")
@@ -1392,6 +1457,17 @@ class YouTubeAPI:
                     mark_source(vid_id, "video", "WORKER PRIMARY")
                     return result, True
                 logger.warning("Worker video URL download failed, trying xBit fallback.")
+
+            if stream:
+                direct_url = await ytdlp_direct_stream_url(vid_id, "video")
+                if direct_url and await validate_stream_source(direct_url):
+                    mark_source(vid_id, "video", "YT-DLP DIRECT")
+                    return direct_url, False
+            else:
+                result = await ytdlp_direct_download(vid_id, filepath, "video")
+                if result:
+                    mark_source(vid_id, "video", "YT-DLP DIRECT")
+                    return result, True
 
             xbit_video_url = None
             if YT_API_KEY and YTPROXY:
