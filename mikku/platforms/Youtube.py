@@ -46,6 +46,8 @@ MIN_CACHED_MEDIA_BYTES = 128 * 1024
 # Download straight from YouTube on THIS server first (one IP for the link and the file, so no 403).
 # YTDLP_DIRECT=0 turns it off. YTDLP_COOKIES_FILE=/path/cookies.txt (optional) helps when YouTube asks to sign in.
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "cookies.txt").strip()
+# Optional: send yt-dlp's YouTube requests through a proxy, e.g. YTDLP_PROXY=http://user:pass@host:port
+YTDLP_PROXY = os.getenv("YTDLP_PROXY", "").strip()
 DOWNLOAD_CACHE_EXTENSIONS = (".m4a", ".mp3", ".mp4", ".webm")
 # Cached songs older than this are deleted automatically (hours). 0 turns the age rule off.
 DOWNLOAD_CACHE_MAX_AGE_HOURS = max(0, int(os.getenv("DOWNLOAD_CACHE_MAX_AGE_HOURS", "12") or 0))
@@ -977,6 +979,8 @@ class YouTubeAPI:
             }
             if temp_filepath:
                 opts.update({"outtmpl": temp_filepath, "force_overwrites": True, "nopart": True})
+            if YTDLP_PROXY:
+                opts["proxy"] = YTDLP_PROXY
             if client:
                 opts["extractor_args"] = {"youtube": {"player_client": [client]}}
             if YTDLP_COOKIES_FILE and os.path.isfile(YTDLP_COOKIES_FILE):
