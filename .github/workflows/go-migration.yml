@@ -10,7 +10,6 @@ on:
       - 'go.mod'
       - 'go.sum'
       - 'Dockerfile'
-      - 'Dockerfile.go'
       - '.github/workflows/go-migration.yml'
 
 permissions:
