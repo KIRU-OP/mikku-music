@@ -1,4 +1,4 @@
-module github.com/KIRU-OP/mikku-music-go
+module github.com/KIRU-OP/mikku-music
 
 go 1.22
 
