@@ -184,7 +184,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		}
 		if added==0 { respond("No playlist tracks could be queued.") } else { respond(fmt.Sprintf("📚 Added %d playlist track(s) to the queue.",added)); s.startWorker(ctx,b,chat) }
 	case "/play":
-		if args == "" { respond("Usage: /play <song name or YouTube URL>"); return }
+		if args == "" { respond("Usage: /play <song name or supported music URL>"); return }
 		searchCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
 		tracks, err := s.youtube.Search(searchCtx, args, 1)
 		cancel()

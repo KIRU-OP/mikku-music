@@ -71,3 +71,12 @@ func (q *Queues) ShuffleUpcoming(chatID int64) int {
  q.chats[chatID] = append([]Item{items[0]}, pending...)
  return len(items)
 }
+
+func (q *Queues) EnqueueFront(chatID int64, item Item) error {
+ item.Title = strings.TrimSpace(item.Title)
+ if item.Title == "" { return ErrEmptyTitle }
+ q.mu.Lock(); defer q.mu.Unlock()
+ if len(q.chats[chatID]) >= MaxQueueItems { return ErrQueueFull }
+ q.chats[chatID] = append([]Item{item}, q.chats[chatID]...)
+ return nil
+}

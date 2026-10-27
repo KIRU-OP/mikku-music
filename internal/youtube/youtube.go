@@ -64,6 +64,7 @@ type Track struct {
 type ytResult struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
+	Uploader string `json:"uploader"`
 	Webpage  string `json:"webpage_url"`
 	Duration float64 `json:"duration"`
 	Thumb    string `json:"thumbnail"`
