@@ -4,7 +4,7 @@ This branch is the Go-only migration track for KIRU-OP/mikku-music.
 
 ## What works in this branch
 - Telegram Bot API polling and command dispatch.
-- /start, /help, /ping, /play, /queue, /skip, and /stop.
+- /start, /help, /ping, /stats, /active, /settings, /auth, /unauth, /admins, /play, /queue, /skip, and /stop.\n- Owner-ID-gated temporary authorization management; authorization currently resets when the process restarts.
 - YouTube search and metadata through yt-dlp.
 - Per-chat bounded in-memory queues with sequential audio download and delivery as Telegram audio messages.
 - Cancellation of an active download, cleanup of downloaded files, upload-size checks, and unit tests.

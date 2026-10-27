@@ -4,7 +4,7 @@ This checklist is intentionally honest: a feature is complete only after impleme
 
 ## Implemented in this branch
 - [x] Go Telegram Bot API polling
-- [x] Basic command dispatch and queue commands
+- [x] Basic command dispatch and queue commands\n- [x] Runtime stats, active-worker view, and settings summary\n- [x] Owner-ID-gated temporary auth/unauth/admin-list commands
 - [x] YouTube search/metadata via yt-dlp
 - [x] Per-chat bounded queue
 - [x] Sequential download and delivery as Telegram audio messages
