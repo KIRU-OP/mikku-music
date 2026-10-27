@@ -36,7 +36,7 @@ import (
 	"os"
 
 	"KanhaMusic/config"
-	"KanhaMusic/kanha/core"
+	"KanhaMusic/mikku/core"
 	"KanhaMusic/kanha/database"
 	"KanhaMusic/kanha/locales"
 	"KanhaMusic/kanha/logger"
