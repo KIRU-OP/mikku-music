@@ -22,7 +22,7 @@ YouTube access is controlled by YouTube and may fail for restricted videos, bot 
 - Telegram bot token from @BotFather
 
 ## Run
-Set BOT_TOKEN, then run go mod tidy, go test -race ./..., and go build ./cmd/mikku. Set YTDLP_PATH to the yt-dlp executable if it is not on PATH. Set DOWNLOAD_DIR to change the temporary download directory. The app reads environment variables directly and does not auto-load a .env file.
+Set BOT_TOKEN, then run go mod tidy and go test -race ./.... To compile without conflicting with the legacy assets directory named mikku, use go build -o /tmp/mikku ./cmd/mikku. Set YTDLP_PATH to the yt-dlp executable if it is not on PATH. Set DOWNLOAD_DIR to change the temporary download directory. The app reads environment variables directly and does not auto-load a .env file.
 
 Optional resolver fallback environment variables: WORKER_FALLBACK_API_URL, WORKER_FALLBACK_API_KEY, and YTDLP_COOKIES_FILE. Use only cookies and credentials you own or are authorized to use.
 
@@ -30,4 +30,4 @@ Optional resolver fallback environment variables: WORKER_FALLBACK_API_URL, WORKE
 Use a runtime image that contains CA certificates, yt-dlp, and ffmpeg. The Go source itself does not require Python; some yt-dlp installation methods use Python as a runtime dependency. For a strictly Python-free runtime, install yt-dlp as a standalone binary or replace it with a supported Go-native resolver.
 
 ## Tests
-Run gofmt -w ., go test -race ./..., and go build ./cmd/mikku.
+Run gofmt -w ., go test -race ./..., and go build -o /tmp/mikku ./cmd/mikku.

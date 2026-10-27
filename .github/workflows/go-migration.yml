@@ -35,4 +35,4 @@ jobs:
       - name: Test
         run: go test -race ./...
       - name: Build
-        run: go build ./cmd/mikku
+        run: go build -o /tmp/mikku-bin ./cmd/mikku
