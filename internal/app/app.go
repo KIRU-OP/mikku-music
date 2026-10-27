@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -33,7 +34,7 @@ type Service struct {
 }
 
 func New() *Service {
-	return &Service{
+	s := &Service{
 		queues: music.NewQueues(),
 		youtube: youtube.New(youtube.Config{YTDLPPath: envOr("YTDLP_PATH", "yt-dlp"), DownloadDir: envOr("DOWNLOAD_DIR", "downloads")}),
 		active: make(map[int64]bool),
@@ -41,6 +42,38 @@ func New() *Service {
 		started: time.Now(),
 		admins: make(map[int64]map[int64]bool),
 	}
+	s.loadAdmins()
+	return s
+}
+
+func (s *Service) authStorePath() string {
+	return envOr("AUTH_STORE_PATH", "data/auth.json")
+}
+
+func (s *Service) loadAdmins() {
+	path := s.authStorePath()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if !os.IsNotExist(err) { log.Printf("read auth store: %v", err) }
+		return
+	}
+	var stored map[int64]map[int64]bool
+	if err := json.Unmarshal(data, &stored); err != nil {
+		log.Printf("decode auth store %s: %v", path, err)
+		return
+	}
+	if stored != nil { s.admins = stored }
+}
+
+// persistAdminsLocked must be called while s.mu is held.
+func (s *Service) persistAdminsLocked() error {
+	path := s.authStorePath()
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil { return err }
+	data, err := json.MarshalIndent(s.admins, "", "  ")
+	if err != nil { return err }
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0600); err != nil { return err }
+	return os.Rename(tmp, path)
 }
 
 func isOwner(userID int64) bool {
@@ -108,15 +141,19 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		s.mu.Lock()
 		if s.admins[msg.Chat.ID] == nil { s.admins[msg.Chat.ID] = make(map[int64]bool) }
 		s.admins[msg.Chat.ID][target] = true
+		err := s.persistAdminsLocked()
 		s.mu.Unlock()
-		respond(fmt.Sprintf("✅ User %d authorized for this chat (temporary; resets on restart).", target))
+		if err != nil { respond("❌ Could not save authorization: " + short(err.Error(), 160)); return }
+		respond(fmt.Sprintf("✅ User %d authorized for this chat.", target))
 	case "/unauth":
 		if msg.From == nil || !isOwner(msg.From.ID) { respond("⛔ Only the configured OWNER_ID can manage bot authorizations."); return }
 		var target int64
 		if _, err := fmt.Sscan(strings.TrimSpace(args), &target); err != nil || target <= 0 { respond("Usage: /unauth <Telegram user ID>"); return }
 		s.mu.Lock()
 		delete(s.admins[msg.Chat.ID], target)
+		err := s.persistAdminsLocked()
 		s.mu.Unlock()
+		if err != nil { respond("❌ Could not save authorization: " + short(err.Error(), 160)); return }
 		respond(fmt.Sprintf("✅ User %d removed from this chat's authorization list.", target))
 	case "/admins":
 		s.mu.Lock()
@@ -124,7 +161,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		for id := range s.admins[msg.Chat.ID] { ids = append(ids, fmt.Sprint(id)) }
 		s.mu.Unlock()
 		if len(ids) == 0 { respond("No extra authorized users in this chat."); return }
-		respond("🔐 Authorized user IDs (temporary):\n" + strings.Join(ids, "\n"))
+		respond("🔐 Authorized user IDs :\n" + strings.Join(ids, "\n"))
 	case "/play":
 		if args == "" { respond("Usage: /play <song name or YouTube URL>"); return }
 		searchCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
