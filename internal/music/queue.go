@@ -3,6 +3,7 @@ package music
 import (
 	"errors"
 	"strings"
+	"math/rand"
 	"sync"
 )
 
@@ -59,4 +60,14 @@ func (q *Queues) Clear(chatID int64) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	delete(q.chats, chatID)
+}
+
+// ShuffleUpcoming randomizes the pending queue while preserving the currently first item.
+func (q *Queues) ShuffleUpcoming(chatID int64) int {
+ q.mu.Lock(); defer q.mu.Unlock()
+ items := q.chats[chatID]; if len(items) < 3 { return len(items) }
+ pending := append([]Item(nil), items[1:]...)
+ rand.Shuffle(len(pending), func(i,j int){ pending[i],pending[j]=pending[j],pending[i] })
+ q.chats[chatID] = append([]Item{items[0]}, pending...)
+ return len(items)
 }

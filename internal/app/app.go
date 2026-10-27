@@ -110,6 +110,9 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		}
 	}
 
+	if s.handleExtendedCommand(ctx, b, msg, command, args, respond) { return }
+	if s.isFeatureBanned(msg.From) { respond("⛔ Your account is blocked from using this bot."); return }
+	if s.isMaintenanceEnabled() && (command == "/play" || command == "/queue") && (msg.From == nil || (!isOwner(msg.From.ID) && !s.isSudo(msg.From.ID))) { respond("🛠️ Bot is temporarily in maintenance mode."); return }
 	switch command {
 	case "/start":
 		respond("🎧 Mikku Music Go is online.\n\nUse /play <song or YouTube URL> to search and send an audio file in this chat. Use /queue, /skip, and /stop to manage requests.\n\nNote: this Go edition sends audio files as Telegram messages; Telegram Bot API does not provide group voice-chat streaming controls.")
@@ -249,6 +252,8 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 			if playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Download failed for "+item.Title+": "+short(err.Error(), 180)) }
 			continue
 		}
+		path, err = s.applyConfiguredSpeed(downloadCtx, chatID, path)
+		if err != nil { cancel(); s.clearCurrentCancel(chatID); s.sendText(parent, b, chatID, "❌ Could not apply speed: "+short(err.Error(), 160)); continue }
 		info, err := os.Stat(path)
 		if err != nil || info.Size() == 0 {
 			cancel(); _ = os.Remove(path); s.clearCurrentCancel(chatID)
@@ -272,7 +277,7 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 		cancel()
 		_ = os.Remove(path)
 		s.clearCurrentCancel(chatID)
-		if err != nil && playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Could not send audio: "+short(err.Error(), 180)) }
+		if err != nil && playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Could not send audio: "+short(err.Error(), 180)) } else if err == nil { s.afterSuccessfulTrack(chatID, item) }
 	}
 }
 
