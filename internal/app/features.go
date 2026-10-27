@@ -53,6 +53,12 @@ func (s *Service) rememberChat(chat int64) {
  if err:=saveFeatureDataLocked();err!=nil {log.Printf("save known chats: %v",err)}
 }
 func (s *Service) isMaintenanceEnabled() bool { featureMu.Lock(); defer featureMu.Unlock(); return features.Maintenance }
+func (s *Service) isAdminPlayMode(chat int64) bool { featureMu.Lock(); defer featureMu.Unlock(); return strings.EqualFold(features.PlayModes[chat],"admins") }
+func (s *Service) canPlayInChat(chat,user int64) bool {
+ if user==0 { return !s.isAdminPlayMode(chat) }
+ if isOwner(user)||s.isSudo(user)||s.canControlChat(chat,user) { return true }
+ return !s.isAdminPlayMode(chat)
+}
 func (s *Service) handleExtendedCommand(ctx context.Context,b *bot.Bot,msg *models.Message,command,args string,respond func(string)) bool {
  if msg==nil{return false}
  id:=int64(0); if msg.From!=nil{id=msg.From.ID}; chat:=msg.Chat.ID
@@ -75,7 +81,7 @@ func (s *Service) handleExtendedCommand(ctx context.Context,b *bot.Bot,msg *mode
   if err!=nil{respond("Could not save loop setting: "+short(err.Error(),120))}else if n==0{respond("🔁 Repeat disabled.")}else{respond(fmt.Sprintf("🔁 Current track will repeat %d more time(s).",n))};return true
  case "/shuffle","/cshuffle":
   if id==0||(!isOwner(id)&&!s.canControlChat(chat,id)&&!s.isSudo(id)){respond("⛔ You are not authorized to shuffle this queue.");return true}
-  n:=s.queues.ShuffleUpcoming(chat);if n==0{respond("Queue is empty.")}else if n==1{respond("Only one track is queued; nothing to shuffle.")}else{respond(fmt.Sprintf("🔀 Shuffled %d queued track(s); current track remains first.",n))};return true
+  n:=s.queues.ShuffleUpcoming(chat);if n==0{respond("Queue is empty.")}else if n<3{respond("Not enough upcoming tracks to shuffle; the current track remains first.")}else{respond(fmt.Sprintf("🔀 Shuffled %d queued track(s); current track remains first.",n))};return true
  case "/speed","/cspeed","/slow","/cslow","/playback","/cplayback":
   if args=="" {featureMu.Lock();v:=features.Speeds[chat];featureMu.Unlock();if v==0{v=1};respond(fmt.Sprintf("⏩ Playback speed: %.2gx\nUse /speed 0.5, 0.75, 1, 1.25, 1.5, or 2. Speed is applied to downloaded audio before it is sent.",v));return true}
   v,err:=strconv.ParseFloat(strings.TrimSpace(args),64);if err!=nil||v<0.5||v>2||!allowedSpeed(v){respond("Usage: /speed 0.5|0.75|1|1.25|1.5|2");return true}
