@@ -50,3 +50,18 @@ func TestNewDefaults(t *testing.T) {
 	a := New(Config{CacheTTL: time.Minute})
 	if a.cfg.YTDLPPath != "yt-dlp" || a.cfg.CacheTTL != time.Minute { t.Fatalf("unexpected config defaults: %#v",a.cfg) }
 }
+
+func TestSupportedMusicURL(t *testing.T) {
+ valid:=[]string{
+  "https://open.spotify.com/track/abc",
+  "https://music.apple.com/us/album/example/123",
+  "https://soundcloud.com/artist/track",
+  "https://on.soundcloud.com/example",
+  "https://artist.bandcamp.com/track/song",
+  "https://www.deezer.com/track/123",
+  "https://tidal.com/browse/track/123",
+ }
+ for _,u:=range valid { if !supportedMusicURL(u) { t.Errorf("expected supported music URL %q",u) } }
+ invalid:=[]string{"https://example.com/track","file:///etc/passwd","http://127.0.0.1/x","javascript:alert(1)","https://soundcloud.com.evil.example/track"}
+ for _,u:=range invalid { if supportedMusicURL(u) { t.Errorf("expected unsupported URL %q",u) } }
+}

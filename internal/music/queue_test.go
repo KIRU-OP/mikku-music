@@ -60,3 +60,14 @@ func TestQueueRejectsItemsOverLimit(t *testing.T) {
 		t.Fatalf("queue length = %d, want %d", got, MaxQueueItems)
 	}
 }
+
+func TestQueueShuffleAndEnqueueFront(t *testing.T) {
+ q:=NewQueues()
+ _=q.Enqueue(5,Item{Title:"current"})
+ _=q.Enqueue(5,Item{Title:"next"})
+ _=q.Enqueue(5,Item{Title:"later"})
+ if n:=q.ShuffleUpcoming(5);n!=3 { t.Fatalf("shuffle count = %d",n) }
+ items:=q.List(5);if items[0].Title!="current"{t.Fatalf("shuffle must preserve current item: %#v",items)}
+ if err:=q.EnqueueFront(5,Item{Title:"repeat"});err!=nil{t.Fatal(err)}
+ if got:=q.List(5)[0].Title;got!="repeat"{t.Fatalf("front enqueue got %q",got)}
+}
