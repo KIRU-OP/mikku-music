@@ -27,8 +27,8 @@ import (
 
 	"KanhaMusic/kanha/logger"
 
-	"KanhaMusic/kanha/core"
-	state "KanhaMusic/kanha/core/models"
+	"KanhaMusic/mikku/core"
+	state "KanhaMusic/mikku/core/models"
 	"KanhaMusic/kanha/locales"
 	"KanhaMusic/kanha/platforms"
 	"KanhaMusic/kanha/utils"
