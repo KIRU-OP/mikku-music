@@ -1,39 +1,18 @@
-# Mikku Music Go migration audit
+# Go migration audit
 
-## Verified repository-level scope
+## This branch
+This is a Go-only migration branch. Python source files and Python deployment entry points are removed from this branch; the default branch remains unchanged as a rollback/reference.
 
-The original Python implementation remains the production implementation. The Go branch is additive and must not be treated as a drop-in replacement yet.
+Implemented:
+- Telegram Bot API polling and basic commands.
+- YouTube search/metadata using yt-dlp.
+- Bounded per-chat in-memory request queue.
+- Sequential download and delivery of audio files as Telegram messages.
+- Cancel current download, skip queued item, clear queue.
+- Download cleanup, timeout, upload-size guard, unit tests and CI build/test checks.
 
-### Implemented in the current Go foundation
-- Telegram bot long polling using `BOT_TOKEN`
-- `/start`, `/help`, `/ping`, `/play`, `/queue`, `/skip`, `/stop`
-- In-memory, per-chat queue with basic unit tests
-- Provider-neutral track-provider interfaces
-- Docker build recipe
-- CI workflow for formatting, tests, race detection, and compilation
+## Remaining feature gaps
+This is not yet feature parity with the original music bot. In particular, it does not provide Telegram group voice-chat playback, PyTgCalls replacement, userbot/assistant sessions, Spotify/Apple Music/SoundCloud/Resso/Telegram provider adapters, MongoDB persistence, admin/sudo plugin suite, inline UI, translations, broadcast, or live-stream controls such as pause/resume/seek/loop/shuffle/speed. Do not deploy it as a drop-in replacement for the original production bot until these features are implemented and integration-tested.
 
-### Not implemented / not verified
-- Real audio playback in Telegram voice chats
-- YouTube, Spotify, Apple Music, SoundCloud, Resso, and Telegram media providers
-- MongoDB persistence
-- Pyrogram userbot/assistant sessions and multi-assistant lifecycle
-- Admin/sudo commands, ban/block lists, maintenance mode, permissions
-- Inline mode, language packs, settings, broadcast, logging, thumbnails, seek/loop/shuffle/speed/pause/resume
-- Live Telegram integration tests or end-to-end audio tests
-
-## Release gate
-
-Do not replace the existing Python deployment until each required feature has a Go implementation, automated tests, and a documented result. Provider integrations must use supported APIs and respect source service terms; a search result or metadata response is not proof that audio playback works.
-
-## Local verification
-
-Install Go 1.22 or newer, then run:
-
-```sh
-go mod tidy
-gofmt -w .
-go test -race ./...
-go build ./cmd/mikku
-```
-
-The GitHub Actions workflow runs formatting checks, tests, race detection, and build checks. A green workflow validates only the code present in this branch; it does not imply feature parity with the Python bot.
+## Verification
+The GitHub Actions workflow checks gofmt, unit tests with the race detector, and compilation. These checks validate the code in this branch only. Real Telegram and YouTube end-to-end checks require deployment credentials and must be performed separately.

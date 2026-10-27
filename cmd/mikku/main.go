@@ -13,19 +13,13 @@ import (
 
 func main() {
 	token := os.Getenv("BOT_TOKEN")
-	if token == "" {
-		log.Fatal("BOT_TOKEN is required")
-	}
-
+	if token == "" { log.Fatal("BOT_TOKEN is required") }
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-
 	service := app.New()
 	tg, err := bot.New(token, bot.WithDefaultHandler(service.Handle))
-	if err != nil {
-		log.Fatalf("initialize Telegram bot: %v", err)
-	}
-
-	log.Println("Mikku Go foundation starting (music playback adapters are not connected yet)")
+	if err != nil { log.Fatalf("initialize Telegram bot: %v", err) }
+	log.Println("Mikku Music Go bot starting")
 	tg.Start(ctx)
+	log.Println("Mikku Music Go bot stopped")
 }

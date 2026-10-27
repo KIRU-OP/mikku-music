@@ -1,91 +1,33 @@
-<div align="center">
+# Mikku Music — Go edition
 
-<img src="https://litter.catbox.moe/vofelg.jpg" width="1000" alt="Mikku Music"/>
+This branch is the Go-only migration track for KIRU-OP/mikku-music.
 
-# 🎧 MIKKU MUSIC
+## What works in this branch
+- Telegram Bot API polling and command dispatch.
+- /start, /help, /ping, /play, /queue, /skip, and /stop.
+- YouTube search and metadata through yt-dlp.
+- Per-chat bounded in-memory queues with sequential audio download and delivery as Telegram audio messages.
+- Cancellation of an active download, cleanup of downloaded files, upload-size checks, and unit tests.
+- Optional configured YouTube Worker fallback in the low-level resolver/download API.
 
-**Fast • Powerful • Premium Telegram Music Bot**
+## Important scope
+This branch sends audio as Telegram chat messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. It is not a feature-for-feature replacement for the original bot's Spotify/Apple Music/SoundCloud/Resso/Telegram providers, MongoDB settings, admin/sudo plugins, inline UI, or language packs. Those features must not be described as ported until they have real Go implementations and tests. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Pyrogram](https://img.shields.io/badge/Pyrogram-v2-0088CC?style=for-the-badge&logo=telegram&logoColor=white)](https://github.com/KurimuzonAkuma/pyrogram)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://cloud.mongodb.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+YouTube access is controlled by YouTube and may fail for restricted videos, bot checks, or unavailable content. Signed media URLs are temporary; this bot downloads the audio immediately instead of exposing a stale URL.
 
-</div>
+## Requirements
+- Go 1.22+
+- yt-dlp
+- ffmpeg (required by yt-dlp for MP3 conversion)
+- Telegram bot token from @BotFather
 
----
+## Run
+Set BOT_TOKEN, then run go mod tidy, go test -race ./..., and go build ./cmd/mikku. Set YTDLP_PATH to the yt-dlp executable if it is not on PATH. Set DOWNLOAD_DIR to change the temporary download directory. The app reads environment variables directly and does not auto-load a .env file.
 
-## ✨ Features
+Optional resolver fallback environment variables: WORKER_FALLBACK_API_URL, WORKER_FALLBACK_API_KEY, and YTDLP_COOKIES_FILE. Use only cookies and credentials you own or are authorized to use.
 
-🎵 YouTube • Spotify • Apple Music • SoundCloud • Resso • Telegram files  
-🎛️ Pause • Resume • Skip • Seek • Loop • Shuffle • Speed  
-👥 Multi-assistant support (up to 5) &nbsp;|&nbsp; 🛡️ Sudo, Gban, Block, Maintenance mode  
+## Docker
+Use a runtime image that contains CA certificates, yt-dlp, and ffmpeg. The Go source itself does not require Python; some yt-dlp installation methods use Python as a runtime dependency. For a strictly Python-free runtime, install yt-dlp as a standalone binary or replace it with a supported Go-native resolver.
 
----
-
-## 🔑 Required Variables
-
-| Variable | Source |
-|---|---|
-| `API_ID` / `API_HASH` | [my.telegram.org](https://my.telegram.org) |
-| `BOT_TOKEN` | [@BotFather](https://t.me/BotFather) |
-| `MONGO_DB_URI` | [MongoDB Atlas](https://cloud.mongodb.com) |
-| `STRING_SESSION` | Pyrogram **v2** session |
-| `OWNER_ID` | [@userinfobot](https://t.me/userinfobot) |
-| `LOGGER_ID` | Private log group ID (`-100xxxxxxxxxx`) |
-
----
-
-## 🚀 Deploy
-
-### 🖥️ VPS (Bash Setup)
-
-```bash
-sudo apt update && sudo apt install git tmux -y
-git clone https://github.com/KIRU-OP/mikku-music.git
-cd mikku-music
-bash setup        # installs everything + creates .env
-tmux new -s mikku
-bash start        # run the bot (Detach: Ctrl+B, D)
-```
-
-### 🐳 Docker
-
-```bash
-git clone https://github.com/KIRU-OP/mikku-music.git && cd mikku-music
-nano .env         # fill the required variables
-docker build -t mikku-music .
-docker run -d --name mikku --restart unless-stopped --env-file .env mikku-music
-```
-
-### ☁️ Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/KIRU-OP/mikku-music)
-
----
-
-## 🔄 Update
-
-```bash
-git pull && pip3 install -U -r requirements.txt
-```
-
----
-
-## 💬 Support
-
-| | |
-|---|---|
-| 📢 **Channel** | [˹ɴᴇxᴏ ʙᴏᴛ sᴜᴘᴘᴏʀᴛ˼](https://t.me/NEXO_BOT_SUPPORT) |
-| 💗 **Group** | [୨୧ ɴᴇxᴏ ᴏғғɪᴄɪᴀʟ ᴄʜᴀᴛ 💗 💌](https://t.me/group_voice_chat) |
-| 👑 **Owner** | [𝐕 𝚬 𝚴 𝚶 𝚳 ⴕ](https://t.me/about_me_venom) |
-
----
-
-<div align="center">
-
-⭐ **Pasand aaya to Star zaroor dena!** ⭐
-
-Made with ❤️ by [KIRU-OP](https://github.com/KIRU-OP)
-
-</div>
+## Tests
+Run gofmt -w ., go test -race ./..., and go build ./cmd/mikku.

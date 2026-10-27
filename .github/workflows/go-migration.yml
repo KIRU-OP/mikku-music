@@ -2,13 +2,14 @@ name: Go migration checks
 
 on:
   push:
-    branches: [go-rewrite-foundation]
+    branches: [go-only-final]
   pull_request:
     branches: [main]
     paths:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
+      - 'Dockerfile'
       - 'Dockerfile.go'
       - '.github/workflows/go-migration.yml'
 
@@ -29,7 +30,7 @@ jobs:
       - name: Resolve dependencies
         run: go mod tidy
       - name: Format Go sources
-        run: find . -type f -name "*.go" -not -path "./vendor/*" -print0 | xargs -0 gofmt -w
+        run: find . -type f -name '*.go' -not -path './vendor/*' -print0 | xargs -0 gofmt -w
       - name: Check whitespace errors
         run: git diff --check
       - name: Test

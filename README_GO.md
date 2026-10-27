@@ -1,41 +1,33 @@
-# Mikku Music — Go migration (foundation)
+# Mikku Music — Go edition
 
-This is a separate, additive Go migration branch. The original Python bot remains untouched.
+This branch is the Go-only migration track for KIRU-OP/mikku-music.
 
-## Status: foundation, not a complete feature-parity release
+## What works in this branch
+- Telegram Bot API polling and command dispatch.
+- /start, /help, /ping, /play, /queue, /skip, and /stop.
+- YouTube search and metadata through yt-dlp.
+- Per-chat bounded in-memory queues with sequential audio download and delivery as Telegram audio messages.
+- Cancellation of an active download, cleanup of downloaded files, upload-size checks, and unit tests.
+- Optional configured YouTube Worker fallback in the low-level resolver/download API.
 
-Included now:
-- Go module and Telegram long-polling entry point
-- `BOT_TOKEN` environment configuration
-- `/start`, `/help`, `/ping`, `/play`, `/queue`, `/skip`, and `/stop`
-- Thread-safe, per-chat in-memory request queue
-- Provider-neutral track and source-adapter interfaces
+## Important scope
+This branch sends audio as Telegram chat messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. It is not a feature-for-feature replacement for the original bot's Spotify/Apple Music/SoundCloud/Resso/Telegram providers, MongoDB settings, admin/sudo plugins, inline UI, or language packs. Those features must not be described as ported until they have real Go implementations and tests. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
 
-Not ported/connected yet:
-- Telegram voice-chat streaming / PyTgCalls replacement
-- YouTube, Spotify, Apple Music, SoundCloud, Resso, and Telegram media adapters
-- MongoDB persistence, multi-assistant/userbot sessions, inline mode
-- Admin/sudo/security, language packs, settings, broadcasts, logs, thumbnails, and remaining commands
-- Loop, shuffle, seek, speed, pause/resume against an active audio stream
+YouTube access is controlled by YouTube and may fail for restricted videos, bot checks, or unavailable content. Signed media URLs are temporary; this bot downloads the audio immediately instead of exposing a stale URL.
 
-The commands deliberately state that playback is not connected. This avoids pretending the migration has feature parity before the streaming layer is implemented.
+## Requirements
+- Go 1.22+
+- yt-dlp
+- ffmpeg (required by yt-dlp for MP3 conversion)
+- Telegram bot token from @BotFather
 
-## Run the foundation
+## Run
+Set BOT_TOKEN, then run go mod tidy, go test -race ./..., and go build ./cmd/mikku. Set YTDLP_PATH to the yt-dlp executable if it is not on PATH. Set DOWNLOAD_DIR to change the temporary download directory. The app reads environment variables directly and does not auto-load a .env file.
 
-Install Go 1.22+ and set a Telegram bot token from BotFather:
+Optional resolver fallback environment variables: WORKER_FALLBACK_API_URL, WORKER_FALLBACK_API_KEY, and YTDLP_COOKIES_FILE. Use only cookies and credentials you own or are authorized to use.
 
-```sh
-export BOT_TOKEN="your-token"
-go mod tidy
-go run ./cmd/mikku
-```
+## Docker
+Use a runtime image that contains CA certificates, yt-dlp, and ffmpeg. The Go source itself does not require Python; some yt-dlp installation methods use Python as a runtime dependency. For a strictly Python-free runtime, install yt-dlp as a standalone binary or replace it with a supported Go-native resolver.
 
-## Migration plan
-
-1. Port configuration, Telegram handlers, permission checks, and database interfaces.
-2. Implement provider adapters one at a time with tests and documented API limitations.
-3. Port the voice-chat streaming layer and assistant lifecycle.
-4. Port admin, settings, inline, language, and maintenance features.
-5. Add integration tests, deployment files, and a feature-by-feature parity checklist.
-
-Do not remove the Python entry point or deploy this foundation as a replacement for the existing bot until the required features are ported and tested.
+## Tests
+Run gofmt -w ., go test -race ./..., and go build ./cmd/mikku.
