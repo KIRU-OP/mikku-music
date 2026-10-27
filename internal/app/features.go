@@ -123,3 +123,14 @@ func (s *Service) afterSuccessfulTrack(chat int64,item music.Item){
  if err!=nil{log.Printf("save loop count: %v",err);return}
  if err:=s.queues.Enqueue(chat,item);err!=nil{log.Printf("repeat enqueue: %v",err)}
 }
+
+func (s *Service) settingsText(chat int64) string {
+ featureMu.Lock()
+ lang:=features.Languages[chat];if lang==""{lang="en"}
+ mode:=features.PlayModes[chat];if mode==""{mode="Everyone"}
+ loop:=features.Loops[chat]
+ speed:=features.Speeds[chat];if speed==0{speed=1}
+ maintenance:=features.Maintenance
+ featureMu.Unlock()
+ return fmt.Sprintf("⚙️ Mikku Go Settings\nLanguage: %s\nPlay mode: %s\nRepeat remaining: %d\nAudio processing speed: %.2gx\nQueue limit: %d requests per chat\nDelivery: Telegram audio message\nSource: yt-dlp-supported URLs\nMaintenance: %t\n\nNote: live group-call controls and inline callback settings are not implemented in this Bot API build.",lang,mode,loop,speed,music.MaxQueueItems,maintenance)
+}

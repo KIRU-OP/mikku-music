@@ -43,6 +43,7 @@ func New() *Service {
 		admins: make(map[int64]map[int64]bool),
 	}
 	s.loadAdmins()
+	s.loadFeatureData()
 	return s
 }
 
@@ -117,7 +118,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 	case "/start":
 		respond("🎧 Mikku Music Go is online.\n\nUse /play <song or YouTube URL> to search and send an audio file in this chat. Use /queue, /skip, and /stop to manage requests.\n\nNote: this Go edition sends audio files as Telegram messages; Telegram Bot API does not provide group voice-chat streaming controls.")
 	case "/help":
-		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list temporary authorized IDs\n/play <song or YouTube URL> — search, download and send audio\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
+		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list authorized IDs\n/lang — language setting (en/hi/pa/ba)\n/mode — playback access mode\n/loop — repeat current track\n/shuffle — shuffle upcoming queue\n/speed — processing speed for upcoming audio\n/maintenance — owner/sudo maintenance switch\n/addsudo /delsudo — manage sudo users\n/block /unblock — block bot users\n/gban /ungban — global bot-level block\n/play <song or YouTube URL> — search, download and send audio\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
 	case "/ping":
 		respond("🏓 Pong! Mikku Go bot is online.")
 	case "/stats":
@@ -136,7 +137,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		if len(chats) == 0 { respond("No active downloads right now."); return }
 		respond("🎧 Active download chats:\n" + strings.Join(chats, "\n"))
 	case "/settings":
-		respond("⚙️ Current settings\nQueue limit: 100 requests per chat\nPlayback mode: audio file sent to this chat\nDownload timeout: 8 minutes\nSource: YouTube via yt-dlp\n\nGroup voice-chat streaming controls are not available in this Go build yet.")
+		respond(s.settingsText(msg.Chat.ID))
 	case "/auth":
 		if msg.From == nil || !isOwner(msg.From.ID) { respond("⛔ Only the configured OWNER_ID can manage bot authorizations."); return }
 		var target int64

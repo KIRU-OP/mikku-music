@@ -31,3 +31,10 @@ Use a runtime image that contains CA certificates, yt-dlp, and ffmpeg. The Go so
 
 ## Tests
 Run gofmt -w ., go test -race ./..., and go build -o /tmp/mikku ./cmd/mikku.
+
+
+## Additional Go command ports
+
+The Go branch now includes persistent chat language/play-mode settings, queue repeat and shuffle, audio speed processing for future downloads, maintenance mode, sudo user management, and persistent bot-level user blocks. These settings are stored in `FEATURE_STORE_PATH` (default `data/features.json`) with restrictive file permissions.
+
+Compatibility boundary: commands that require Pyrogram MTProto sessions, PyTgCalls group voice/video chat, inline callback query handlers, or MongoDB-backed group state are not equivalent yet. In particular, `/pause`, `/resume`, and `/seek` explain that the Bot API edition sends complete audio messages and cannot control an active group call. Global block commands prevent use of this bot; they do not ban users across every Telegram group.
