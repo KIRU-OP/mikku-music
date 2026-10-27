@@ -22,7 +22,7 @@ import (
 	"github.com/Kanha/Meow/filters/callbackquery"
 
 	"KanhaMusic/config"
-	"KanhaMusic/kanha/core"
+	"KanhaMusic/mikku/core"
 )
 
 func Init(bot *td.Client, assistants *core.AssistantManager) {
