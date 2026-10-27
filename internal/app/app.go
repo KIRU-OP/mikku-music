@@ -180,9 +180,9 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 			if e != nil || len(tracks)==0 { continue }
 			track:=tracks[0]; requester:=""
 			if msg.From!=nil { requester=msg.From.Username; if requester=="" {requester=msg.From.FirstName} }
-			if e=s.queues.Enqueue(chat,music.Item{Title:track.Title,RequestedBy:requester,URL:track.URL,ID:track.ID,DurationSec:track.DurationSec,Thumbnail:track.Thumbnail}); e==nil {added++}
+			if e=s.queues.Enqueue(msg.Chat.ID,music.Item{Title:track.Title,RequestedBy:requester,URL:track.URL,ID:track.ID,DurationSec:track.DurationSec,Thumbnail:track.Thumbnail}); e==nil {added++}
 		}
-		if added==0 { respond("No playlist tracks could be queued.") } else { respond(fmt.Sprintf("📚 Added %d playlist track(s) to the queue.",added)); s.startWorker(ctx,b,chat) }
+		if added==0 { respond("No playlist tracks could be queued.") } else { respond(fmt.Sprintf("📚 Added %d playlist track(s) to the queue.",added)); s.startWorker(ctx,b,msg.Chat.ID) }
 	case "/play":
 		if args == "" { respond("Usage: /play <song name or supported music URL>"); return }
 		searchCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
