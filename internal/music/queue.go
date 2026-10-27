@@ -2,10 +2,16 @@ package music
 
 import (
 	"errors"
+	"strings"
 	"sync"
 )
 
-var ErrEmptyTitle = errors.New("queue item title cannot be empty")
+var (
+	ErrEmptyTitle = errors.New("queue item title cannot be empty")
+	ErrQueueFull  = errors.New("queue is full (maximum 100 requests per chat)")
+)
+
+const MaxQueueItems = 100
 
 type Item struct {
 	Title       string
@@ -13,18 +19,23 @@ type Item struct {
 }
 
 type Queues struct {
-	mu     sync.RWMutex
-	chats  map[int64][]Item
+	mu    sync.RWMutex
+	chats map[int64][]Item
 }
 
 func NewQueues() *Queues { return &Queues{chats: make(map[int64][]Item)} }
 
 func (q *Queues) Enqueue(chatID int64, item Item) error {
+	item.Title = strings.TrimSpace(item.Title)
 	if item.Title == "" {
 		return ErrEmptyTitle
 	}
+
 	q.mu.Lock()
 	defer q.mu.Unlock()
+	if len(q.chats[chatID]) >= MaxQueueItems {
+		return ErrQueueFull
+	}
 	q.chats[chatID] = append(q.chats[chatID], item)
 	return nil
 }
