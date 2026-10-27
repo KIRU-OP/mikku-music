@@ -29,6 +29,10 @@
 
 ---
 
+<p align="center">
+  <strong>✦ Customized & maintained by кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</strong>
+</p>
+
 ## ✨ Features & Highlights
 
 - ⚡ **Ultra-Low Latency Streaming:** Powered by Go and native `ntgcalls` CGO bindings, ensuring crystal-clear playback without audio stutters or drops.
@@ -269,5 +273,5 @@ Distributed under the **GNU General Public License v3.0**. See the [`LICENSE`](.
 </p>
 
 <p align="center">
-  <b>Developed & Maintained with ❤️ by <a href="https://github.com/Oyekanhaa">Kanha</a></b>
+  <b>Original project by <a href="https://github.com/Oyekanhaa">Kanha</a> · Customized by <strong>кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ]</strong></b>
 </p>
