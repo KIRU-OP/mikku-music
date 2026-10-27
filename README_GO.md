@@ -12,7 +12,7 @@ This branch is the Go-only migration track for KIRU-OP/mikku-music.
 - Optional configured YouTube Worker fallback in the low-level resolver/download API.
 
 ## Important scope
-This branch sends audio as Telegram chat messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. Music catalogue links are resolved by metadata and a YouTube search match, not native provider streams. MongoDB migration, real Telegram group-admin checks, full inline UI/callbacks, channel play and full language translations remain incomplete. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
+This branch sends audio/video as Telegram chat media messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. Music catalogue links are resolved by metadata and a YouTube search match, not native provider streams. MongoDB migration, real Telegram group-admin checks, full inline UI/callbacks, channel play and full language translations remain incomplete. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
 
 YouTube access is controlled by YouTube and may fail for restricted videos, bot checks, or unavailable content. Signed media URLs are temporary; this bot downloads the audio immediately instead of exposing a stale URL.
 

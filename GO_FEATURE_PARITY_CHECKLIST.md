@@ -3,22 +3,25 @@
 This checklist is intentionally honest: a feature is complete only after implementation and tests.
 
 ## Implemented in this branch
-- [x] Go Telegram Bot API polling
-- [x] Basic command dispatch and queue commands\n- [x] Runtime stats, active-worker view, and settings summary\n- [x] Owner-ID-gated temporary auth/unauth/admin-list commands
-- [x] YouTube search/metadata via yt-dlp
-- [x] Per-chat bounded queue
-- [x] Sequential download and delivery as Telegram audio messages
-- [x] Cancellation of current download and queue clear/skip
-- [x] Download cleanup and upload-size guard
-- [x] Unit tests and CI workflow
+- [x] Go Telegram Bot API polling and command dispatch
+- [x] /start, /help, /ping, /stats, /active and /settings
+- [x] /play audio and /vplay video message delivery aliases
+- [x] YouTube search/metadata via yt-dlp and best-effort catalogue-link metadata resolution
+- [x] YouTube playlist queueing (up to 25 tracks)
+- [x] Bounded per-chat queue, queue display, shuffle, skip, stop and repeat
+- [x] Audio speed processing for upcoming downloads
+- [x] Owner-ID-gated /auth, /unauth and /admins
+- [x] Persistent /lang, /mode, /maintenance, sudo list management, bot-level block list and /broadcast
+- [x] Local JSON persistence for auth/settings/known chats with restrictive permissions
+- [x] Download timeout, temporary file cleanup, upload-size guard, unit tests and CI workflow
 
 ## Not yet equivalent to the original Python bot
-- [ ] Telegram group voice-chat playback and assistant sessions
-- [ ] Full source-specific adapters and original stream resolution for Spotify/Apple Music/SoundCloud/Resso/Telegram media
-- [ ] MongoDB persistence and settings migrations
-- [ ] Full Telegram group admin permission checks, original global-ban semantics and remaining plugin commands
-- [ ] Inline UI/callback handlers, full translation packs, channel-play routing, autoplay/autoleave/watchers
-- [ ] Pause/resume/seek controls for active voice-chat streams
+- [ ] Telegram MTProto userbot/assistant session login and group voice/video-call playback (PyTgCalls equivalent)
+- [ ] Full source-specific adapters and native stream resolution for Spotify/Apple Music/SoundCloud/Resso/Telegram media
+- [ ] MongoDB-backed persistence and migration of existing database records
+- [ ] Telegram group admin permission checks and full original global-ban semantics across every served chat
+- [ ] Original inline UI, callback handlers, full language packs, channel-play routing, autoplay/autoleave/watchers
+- [ ] Live-call pause/resume/seek controls
 - [ ] Integration and end-to-end tests against a real Telegram chat and media source
 
-The original default branch is preserved. Do not merge this migration branch as a production replacement until the remaining requirements are implemented and verified.
+The original default branch is preserved. This branch is not a drop-in production replacement until the remaining requirements are implemented and verified.
