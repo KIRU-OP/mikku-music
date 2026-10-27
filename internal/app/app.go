@@ -121,6 +121,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 
 	if s.handleExtendedCommand(ctx, b, msg, command, args, respond) { return }
 	if s.isFeatureBanned(msg.From) { respond("⛔ Your account is blocked from using this bot."); return }
+	s.rememberChat(msg.Chat.ID)
 	if s.isMaintenanceEnabled() && (command == "/play" || command == "/queue") && (msg.From == nil || (!isOwner(msg.From.ID) && !s.isSudo(msg.From.ID))) { respond("🛠️ Bot is temporarily in maintenance mode."); return }
 	switch command {
 	case "/start":

@@ -25,6 +25,7 @@ type featureData struct {
  Speeds map[int64]float64 `json:"speeds"`
  Sudoers map[int64]bool `json:"sudoers"`
  BannedUsers map[int64]bool `json:"banned_users"`
+ Chats map[int64]bool `json:"chats"`
  Maintenance bool `json:"maintenance"`
 }
 var featureMu sync.Mutex
@@ -35,7 +36,7 @@ func (s *Service) loadFeatureData() {
  featureMu.Lock(); defer featureMu.Unlock()
  raw,err:=os.ReadFile(featurePath()); if err!=nil { if !os.IsNotExist(err){log.Printf("read feature store: %v",err)}; return }
  d:=newFeatureData(); if err=json.Unmarshal(raw,&d); err!=nil {log.Printf("decode feature store: %v",err);return}
- if d.Languages==nil {d.Languages=map[int64]string{}}; if d.PlayModes==nil {d.PlayModes=map[int64]string{}}; if d.Loops==nil {d.Loops=map[int64]int{}}; if d.Speeds==nil {d.Speeds=map[int64]float64{}}; if d.Sudoers==nil {d.Sudoers=map[int64]bool{}}; if d.BannedUsers==nil {d.BannedUsers=map[int64]bool{}}
+ if d.Languages==nil {d.Languages=map[int64]string{}}; if d.PlayModes==nil {d.PlayModes=map[int64]string{}}; if d.Loops==nil {d.Loops=map[int64]int{}}; if d.Speeds==nil {d.Speeds=map[int64]float64{}}; if d.Sudoers==nil {d.Sudoers=map[int64]bool{}}; if d.BannedUsers==nil {d.BannedUsers=map[int64]bool{}}; if d.Chats==nil {d.Chats=map[int64]bool{}}
  features=d
 }
 func saveFeatureDataLocked() error {
@@ -44,7 +45,13 @@ func saveFeatureDataLocked() error {
  tmp:=path+".tmp"; if err=os.WriteFile(tmp,raw,0600);err!=nil{return err};return os.Rename(tmp,path)
 }
 func (s *Service) isSudo(id int64) bool { featureMu.Lock(); defer featureMu.Unlock(); return features.Sudoers[id] }
-func (s *Service) isFeatureBanned(user *models.User) bool { if user==nil{return false}; featureMu.Lock(); defer featureMu.Unlock(); return features.BannedUsers[user.ID] }
+func (s *Service) isFeatureBanned(user *models.User) bool { if user==nil || isOwner(user.ID) || s.isSudo(user.ID) {return false}; featureMu.Lock(); defer featureMu.Unlock(); return features.BannedUsers[user.ID] }
+func (s *Service) rememberChat(chat int64) {
+ featureMu.Lock(); defer featureMu.Unlock()
+ if features.Chats[chat] { return }
+ features.Chats[chat]=true
+ if err:=saveFeatureDataLocked();err!=nil {log.Printf("save known chats: %v",err)}
+}
 func (s *Service) isMaintenanceEnabled() bool { featureMu.Lock(); defer featureMu.Unlock(); return features.Maintenance }
 func (s *Service) handleExtendedCommand(ctx context.Context,b *bot.Bot,msg *models.Message,command,args string,respond func(string)) bool {
  if msg==nil{return false}
@@ -74,6 +81,13 @@ func (s *Service) handleExtendedCommand(ctx context.Context,b *bot.Bot,msg *mode
   v,err:=strconv.ParseFloat(strings.TrimSpace(args),64);if err!=nil||v<0.5||v>2||!allowedSpeed(v){respond("Usage: /speed 0.5|0.75|1|1.25|1.5|2");return true}
   if id==0||(!isOwner(id)&&!s.canControlChat(chat,id)&&!s.isSudo(id)){respond("⛔ You are not authorized to change playback settings.");return true}
   featureMu.Lock();features.Speeds[chat]=v;err=saveFeatureDataLocked();featureMu.Unlock();if err!=nil{respond("Could not save speed: "+short(err.Error(),120))}else{respond(fmt.Sprintf("✅ Speed set to %.2gx for upcoming downloads.",v))};return true
+ case "/broadcast":
+  if id==0||(!isOwner(id)&&!s.isSudo(id)){respond("⛔ Owner/sudo access required.");return true}
+  if strings.TrimSpace(args)==""{respond("Usage: /broadcast <message>");return true}
+  featureMu.Lock();chats:=make([]int64,0,len(features.Chats));for cid,on:=range features.Chats{if on{chats=append(chats,cid)}};featureMu.Unlock()
+  sent,failed:=0,0
+  for _,cid:=range chats { if _,err:=b.SendMessage(ctx,&bot.SendMessageParams{ChatID:cid,Text:args});err!=nil{failed++;log.Printf("broadcast to %d: %v",cid,err)}else{sent++} }
+  respond(fmt.Sprintf("📣 Broadcast complete. Sent: %d, failed: %d.",sent,failed));return true
  case "/maintenance":
   if id==0||(!isOwner(id)&&!s.isSudo(id)){respond("⛔ Owner or sudo access required.");return true}
   state:=strings.ToLower(strings.TrimSpace(args));if state!="enable"&&state!="disable"{respond("Usage: /maintenance enable|disable");return true}
