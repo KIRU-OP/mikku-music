@@ -51,6 +51,13 @@ func isOwner(userID int64) bool {
 	return owner > 0 && owner == userID
 }
 
+func (s *Service) canControlChat(chatID, userID int64) bool {
+	if isOwner(userID) { return true }
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.admins[chatID][userID]
+}
+
 func envOr(key, fallback string) string {
 	if value := strings.TrimSpace(os.Getenv(key)); value != "" { return value }
 	return fallback
@@ -149,6 +156,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		if len(items) > limit { fmt.Fprintf(&out, "…and %d more request(s).", len(items)-limit) }
 		respond(strings.TrimSpace(out.String()))
 	case "/skip":
+		if msg.From == nil || !s.canControlChat(msg.Chat.ID, msg.From.ID) { respond("⛔ Only the configured owner or a user authorized with /auth can skip requests."); return }
 		s.mu.Lock()
 		cancelCurrent := s.cancel[msg.Chat.ID]
 		if cancelCurrent != nil { cancelCurrent() }
@@ -156,6 +164,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		if cancelCurrent != nil { respond("⏭️ Skipping the current download/request."); return }
 		if item, ok := s.queues.Skip(msg.Chat.ID); ok { respond("⏭️ Skipped: " + item.Title) } else { respond("Nothing is queued.") }
 	case "/stop":
+		if msg.From == nil || !s.canControlChat(msg.Chat.ID, msg.From.ID) { respond("⛔ Only the configured owner or a user authorized with /auth can stop playback."); return }
 		s.mu.Lock()
 		if cancelCurrent := s.cancel[msg.Chat.ID]; cancelCurrent != nil { cancelCurrent() }
 		s.queues.Clear(msg.Chat.ID)
