@@ -30,7 +30,7 @@ type featureData struct {
 }
 var featureMu sync.Mutex
 var features = newFeatureData()
-func newFeatureData() featureData { return featureData{Languages:map[int64]string{},PlayModes:map[int64]string{},Loops:map[int64]int{},Speeds:map[int64]float64{},Sudoers:map[int64]bool{},BannedUsers:map[int64]bool{}} }
+func newFeatureData() featureData { return featureData{Languages:map[int64]string{},PlayModes:map[int64]string{},Loops:map[int64]int{},Speeds:map[int64]float64{},Sudoers:map[int64]bool{},BannedUsers:map[int64]bool{},Chats:map[int64]bool{}} }
 func featurePath() string { return envOr("FEATURE_STORE_PATH","data/features.json") }
 func (s *Service) loadFeatureData() {
  featureMu.Lock(); defer featureMu.Unlock()
