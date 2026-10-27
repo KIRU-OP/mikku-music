@@ -30,8 +30,8 @@ import (
 	td "github.com/Kanha/Meow"
 
 	"KanhaMusic/config"
-	"KanhaMusic/kanha/core"
-	state "KanhaMusic/kanha/core/models"
+	"KanhaMusic/mikku/core"
+	state "KanhaMusic/mikku/core/models"
 	"KanhaMusic/kanha/database"
 	"KanhaMusic/kanha/locales"
 	"KanhaMusic/kanha/platforms"
