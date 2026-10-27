@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/KIRU-OP/mikku-music-go/internal/music"
+	"github.com/KIRU-OP/mikku-music/internal/music"
 )
 
 type Service struct { queues *music.Queues }
