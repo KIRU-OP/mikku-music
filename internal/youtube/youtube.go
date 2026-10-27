@@ -178,6 +178,14 @@ func (a *API) Search(ctx context.Context, query string, limit int) ([]Track, err
 		target = defaultBase + query
 	} else if normalized, normalizeErr := cleanURL(query); normalizeErr == nil {
 		target = normalized
+	} else if strings.HasPrefix(strings.ToLower(query), "http://") || strings.HasPrefix(strings.ToLower(query), "https://") {
+		if !supportedMusicURL(query) { return nil, errors.New("unsupported URL: use YouTube, Spotify, Apple Music, SoundCloud, Bandcamp, Deezer, or Tidal") }
+		// Resolve supported music-service metadata first, then locate the playable YouTube result.
+		source, sourceErr := a.runJSON(ctx, "--no-playlist", query)
+		if sourceErr != nil { return nil, fmt.Errorf("resolve music source: %w", sourceErr) }
+		searchText := strings.TrimSpace(source.Title + " " + source.Uploader)
+		if searchText == "" { return nil, errors.New("music source returned no title metadata") }
+		target = fmt.Sprintf("ytsearch%d:%s", limit, searchText)
 	} else {
 		target = fmt.Sprintf("ytsearch%d:%s", limit, query)
 	}
@@ -337,4 +345,12 @@ func (a *API) CheckStream(ctx context.Context, streamURL string) bool {
 	req.Header.Set("Range","bytes=0-0")
 	resp, err := a.http.Do(req); if err != nil { return false }; defer resp.Body.Close()
 	return resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusPartialContent
+}
+
+func supportedMusicURL(raw string) bool {
+ u,err:=url.Parse(strings.TrimSpace(raw)); if err!=nil || (u.Scheme!="https" && u.Scheme!="http") { return false }
+ host:=strings.ToLower(u.Hostname())
+ allowed:=[]string{"open.spotify.com","music.apple.com","soundcloud.com","on.soundcloud.com","bandcamp.com","deezer.com","tidal.com","music.amazon.com","resso.com"}
+ for _,domain:=range allowed { if host==domain || strings.HasSuffix(host,"."+domain) { return true } }
+ return false
 }

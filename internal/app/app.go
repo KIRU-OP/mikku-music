@@ -118,7 +118,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 	case "/start":
 		respond("🎧 Mikku Music Go is online.\n\nUse /play <song or YouTube URL> to search and send an audio file in this chat. Use /queue, /skip, and /stop to manage requests.\n\nNote: this Go edition sends audio files as Telegram messages; Telegram Bot API does not provide group voice-chat streaming controls.")
 	case "/help":
-		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list authorized IDs\n/lang — language setting (en/hi/pa/ba)\n/mode — playback access mode\n/loop — repeat current track\n/shuffle — shuffle upcoming queue\n/speed — processing speed for upcoming audio\n/maintenance — owner/sudo maintenance switch\n/addsudo /delsudo — manage sudo users\n/block /unblock — block bot users\n/gban /ungban — global bot-level block\n/play <song or YouTube URL> — search, download and send audio\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
+		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list authorized IDs\n/lang — language setting (en/hi/pa/ba)\n/mode — playback access mode\n/loop — repeat current track\n/shuffle — shuffle upcoming queue\n/speed — processing speed for upcoming audio\n/maintenance — owner/sudo maintenance switch\n/addsudo /delsudo — manage sudo users\n/block /unblock — block bot users\n/gban /ungban — global bot-level block\n/play <song or supported music URL> — search and send audio\n/playlist <YouTube playlist URL> — queue playlist tracks\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
 	case "/ping":
 		respond("🏓 Pong! Mikku Go bot is online.")
 	case "/stats":
@@ -166,6 +166,23 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		s.mu.Unlock()
 		if len(ids) == 0 { respond("No extra authorized users in this chat."); return }
 		respond("🔐 Authorized user IDs :\n" + strings.Join(ids, "\n"))
+	case "/playlist":
+		if args == "" { respond("Usage: /playlist <YouTube playlist URL>"); return }
+		listCtx, listCancel := context.WithTimeout(ctx, 90*time.Second)
+		ids, err := s.youtube.Playlist(listCtx, args, 25)
+		listCancel()
+		if err != nil { respond("❌ Could not read playlist: "+short(err.Error(),180)); return }
+		added := 0
+		for _, videoID := range ids {
+			searchCtx, searchCancel := context.WithTimeout(ctx, 30*time.Second)
+			tracks, e := s.youtube.Search(searchCtx, videoID, 1)
+			searchCancel()
+			if e != nil || len(tracks)==0 { continue }
+			track:=tracks[0]; requester:=""
+			if msg.From!=nil { requester=msg.From.Username; if requester=="" {requester=msg.From.FirstName} }
+			if e=s.queues.Enqueue(chat,music.Item{Title:track.Title,RequestedBy:requester,URL:track.URL,ID:track.ID,DurationSec:track.DurationSec,Thumbnail:track.Thumbnail}); e==nil {added++}
+		}
+		if added==0 { respond("No playlist tracks could be queued.") } else { respond(fmt.Sprintf("📚 Added %d playlist track(s) to the queue.",added)); s.startWorker(ctx,b,chat) }
 	case "/play":
 		if args == "" { respond("Usage: /play <song name or YouTube URL>"); return }
 		searchCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
