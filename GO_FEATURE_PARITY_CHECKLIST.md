@@ -14,7 +14,7 @@ This file is the release checklist for replacing the Python implementation. A ch
 - [ ] Telegram voice-chat join/leave and audio/video stream transport
 - [ ] Play, pause, resume, stop, skip, seek, loop, shuffle, speed, volume
 - [ ] Stream-ended handling, auto-end, active chat/video chat tracking
-- [ ] YouTube search, metadata, safe URL validation, duration limits, thumbnails
+- [ ] YouTube feature parity with `mikku/Youtube.py` (partial port added at `internal/youtube/youtube.go`: search, metadata, URL/ID validation, playlist IDs, stream URL resolution, downloads, autoplay fallback and stream probe; original download-cache/worker-fallback/autoplay/source-status integrations and complete parity remain outstanding)
 - [ ] Spotify track/album/playlist resolution (API credentials optional)
 - [ ] Apple Music metadata resolution
 - [ ] SoundCloud resolution
