@@ -64,8 +64,7 @@ addauth_success_with_count: "{emoji:✅} تمت إضافة {user}.\nالآن ي�
 addauth_success: "{emoji:✅} تمت إضافة {user} بنجاح إلى قائمة المستخدمين المصرح لهم."
 
 # 🤖 Bot Added to Chat
-bot_added_normal: "{emoji:🎵} شكراً لإضافتي! استخدم /play [اسم الأغنية] لبدء تشغيل الموسيقى."
-
+bot_added_normal: "{emoji:🎵} شكراً لإضافتي! استخدم /play [اسم الأغنية] لبدء تشغيل الموسيقى.\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
 # ⚠️ Bot Demotion
 bot_demotion_goodbye: |
   <b>{emoji:⚠️} ليس لدي صلاحيات</b>
@@ -743,10 +742,8 @@ speed_reset_success: "{emoji:✅} تمت إعادة تعيين سرعة التش
 
 speed_set: "{emoji:🚀} تم تعيين سرعة التشغيل إلى <b>{speed}x</b> بواسطة {user}."
 
-start_private: "مرحباً {user}، اسمي {bot}.\n\nأنا مساعد آلي لبث الموسيقى على تيليجرام مع ميزات مفيدة. أدعم منصات مثل Youtube و Spotify و JioSaavn و Soundcloud وغيرها.\n\nلا تتردد في إضافتي إلى مجموعاتك. {emoji:👍}"
-
-start_group: "<b>{emoji:💫} أنا هنا!</b> جرب أمراً ما... إذا كنت تظن أنك تستطيع السيطرة علي {emoji:😉}"
-
+start_private: "مرحباً {user}، اسمي {bot}.\n\nأنا مساعد آلي لبث الموسيقى على تيليجرام مع ميزات مفيدة. أدعم منصات مثل Youtube و Spotify و JioSaavn و Soundcloud وغيرها.\n\nلا تتردد في إضافتي إلى مجموعاتك. {emoji:👍}\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
+start_group: "<b>{emoji:💫} أنا هنا!</b> جرب أمراً ما... إذا كنت تظن أنك تستطيع السيطرة علي {emoji:😉}\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
 stream_queue_finished: "{emoji:🎵} <b>انتهت قائمة الانتظار!</b>\n\nلا توجد أغاني أخرى للتشغيل. استخدم /play لإضافة المزيد! {emoji:🎶}"
 stream_downloading_next: "{emoji:📥} جاري تنزيل المقطع التالي..."
 stream_autoplay_next: "{emoji:🔁} التشغيل التلقائي: <b>{title}</b>"
