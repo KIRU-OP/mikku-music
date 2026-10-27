@@ -44,7 +44,7 @@ func envOr(key, fallback string) string {
 }
 
 func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update.Message == nil || update.Message.Chat == nil { return }
+	if update.Message == nil { return }
 	msg := update.Message
 	text := strings.TrimSpace(msg.Text)
 	if text == "" { return }

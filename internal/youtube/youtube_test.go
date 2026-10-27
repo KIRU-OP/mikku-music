@@ -15,7 +15,7 @@ func TestVideoID(t *testing.T) {
 		"https://youtube.com/shorts/dQw4w9WgXcQ": "dQw4w9WgXcQ",
 		"https://youtube.com/embed/dQw4w9WgXcQ": "dQw4w9WgXcQ",
 		"https://example.com/watch?v=dQw4w9WgXcQ": "",
-		"not-a-video": "",
+		"invalid": "",
 	}
 	for input, want := range cases {
 		if got := a.VideoID(input); got != want { t.Errorf("VideoID(%q) = %q, want %q", input, got, want) }
