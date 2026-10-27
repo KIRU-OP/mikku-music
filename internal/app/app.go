@@ -27,6 +27,9 @@ type Service struct {
 	mu sync.Mutex
 	active map[int64]bool
 	cancel map[int64]context.CancelFunc
+	started time.Time
+	requests uint64
+	admins map[int64]map[int64]bool
 }
 
 func New() *Service {
@@ -35,7 +38,17 @@ func New() *Service {
 		youtube: youtube.New(youtube.Config{YTDLPPath: envOr("YTDLP_PATH", "yt-dlp"), DownloadDir: envOr("DOWNLOAD_DIR", "downloads")}),
 		active: make(map[int64]bool),
 		cancel: make(map[int64]context.CancelFunc),
+		started: time.Now(),
+		admins: make(map[int64]map[int64]bool),
 	}
+}
+
+func isOwner(userID int64) bool {
+	raw := strings.TrimSpace(os.Getenv("OWNER_ID"))
+	if raw == "" { return false }
+	var owner int64
+	if _, err := fmt.Sscan(raw, &owner); err != nil { return false }
+	return owner > 0 && owner == userID
 }
 
 func envOr(key, fallback string) string {
@@ -64,6 +77,47 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/play <song or YouTube URL> — search, download and send audio\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
 	case "/ping":
 		respond("🏓 Pong! Mikku Go bot is online.")
+	case "/stats":
+		s.mu.Lock()
+		activeCount := 0
+		for _, running := range s.active { if running { activeCount++ } }
+		requests := s.requests
+		uptime := time.Since(s.started).Round(time.Second)
+		s.mu.Unlock()
+		respond(fmt.Sprintf("📊 Mikku Go Stats\nUptime: %s\nActive chat workers: %d\nRequests accepted: %d", uptime, activeCount, requests))
+	case "/active":
+		s.mu.Lock()
+		var chats []string
+		for id, running := range s.active { if running { chats = append(chats, fmt.Sprint(id)) } }
+		s.mu.Unlock()
+		if len(chats) == 0 { respond("No active downloads right now."); return }
+		respond("🎧 Active download chats:\n" + strings.Join(chats, "\n"))
+	case "/settings":
+		respond("⚙️ Current settings\nQueue limit: 100 requests per chat\nPlayback mode: audio file sent to this chat\nDownload timeout: 8 minutes\nSource: YouTube via yt-dlp\n\nGroup voice-chat streaming controls are not available in this Go build yet.")
+	case "/auth":
+		if msg.From == nil || !isOwner(msg.From.ID) { respond("⛔ Only the configured OWNER_ID can manage bot authorizations."); return }
+		var target int64
+		if _, err := fmt.Sscan(strings.TrimSpace(args), &target); err != nil || target <= 0 { respond("Usage: /auth <Telegram user ID>"); return }
+		s.mu.Lock()
+		if s.admins[msg.Chat.ID] == nil { s.admins[msg.Chat.ID] = make(map[int64]bool) }
+		s.admins[msg.Chat.ID][target] = true
+		s.mu.Unlock()
+		respond(fmt.Sprintf("✅ User %d authorized for this chat (temporary; resets on restart).", target))
+	case "/unauth":
+		if msg.From == nil || !isOwner(msg.From.ID) { respond("⛔ Only the configured OWNER_ID can manage bot authorizations."); return }
+		var target int64
+		if _, err := fmt.Sscan(strings.TrimSpace(args), &target); err != nil || target <= 0 { respond("Usage: /unauth <Telegram user ID>"); return }
+		s.mu.Lock()
+		delete(s.admins[msg.Chat.ID], target)
+		s.mu.Unlock()
+		respond(fmt.Sprintf("✅ User %d removed from this chat's authorization list.", target))
+	case "/admins":
+		s.mu.Lock()
+		ids := make([]string, 0, len(s.admins[msg.Chat.ID]))
+		for id := range s.admins[msg.Chat.ID] { ids = append(ids, fmt.Sprint(id)) }
+		s.mu.Unlock()
+		if len(ids) == 0 { respond("No extra authorized users in this chat."); return }
+		respond("🔐 Authorized user IDs (temporary):\n" + strings.Join(ids, "\n"))
 	case "/play":
 		if args == "" { respond("Usage: /play <song name or YouTube URL>"); return }
 		searchCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
@@ -78,6 +132,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		}
 		item := music.Item{Title: track.Title, RequestedBy: requestedBy, URL: track.URL, ID: track.ID, DurationSec: track.DurationSec, Thumbnail: track.Thumbnail}
 		if err := s.queues.Enqueue(msg.Chat.ID, item); err != nil { respond("❌ " + err.Error()); return }
+		s.mu.Lock(); s.requests++; s.mu.Unlock()
 		respond(fmt.Sprintf("📥 Added to queue: %s (%s)", track.Title, track.DurationMin))
 		s.startWorker(ctx, b, msg.Chat.ID)
 	case "/queue":
