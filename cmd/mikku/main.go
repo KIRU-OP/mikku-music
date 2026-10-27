@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/go-telegram/bot"
-	"github.com/KIRU-OP/mikku-music-go/internal/app"
+	"github.com/KIRU-OP/mikku-music/internal/app"
 )
 
 func main() {
