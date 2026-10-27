@@ -253,6 +253,7 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 			if playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Download failed for "+item.Title+": "+short(err.Error(), 180)) }
 			continue
 		}
+		originalPath := path
 		path, err = s.applyConfiguredSpeed(downloadCtx, chatID, path)
 		if err != nil { cancel(); s.clearCurrentCancel(chatID); s.sendText(parent, b, chatID, "❌ Could not apply speed: "+short(err.Error(), 160)); continue }
 		info, err := os.Stat(path)
@@ -277,6 +278,7 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 		}
 		cancel()
 		_ = os.Remove(path)
+		if originalPath != path { _ = os.Remove(originalPath) }
 		s.clearCurrentCancel(chatID)
 		if err != nil && playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Could not send audio: "+short(err.Error(), 180)) } else if err == nil { s.afterSuccessfulTrack(chatID, item) }
 	}

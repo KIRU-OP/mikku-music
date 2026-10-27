@@ -12,7 +12,6 @@ import (
  "strconv"
  "strings"
  "sync"
- "time"
 
  "github.com/go-telegram/bot"
  "github.com/go-telegram/bot/models"
@@ -109,7 +108,7 @@ func (s *Service) handleExtendedCommand(ctx context.Context,b *bot.Bot,msg *mode
  return false
 }
 func allowedSpeed(v float64) bool {for _,x:=range []float64{0.5,0.75,1,1.25,1.5,2}{if math.Abs(v-x)<0.001{return true}};return false}
-func (s *Service) adminChatLocked(chat,user int64) bool { return s.admins[chat][user] }
+func (s *Service) adminChatLocked(chat,user int64) bool { s.mu.Lock(); defer s.mu.Unlock(); return s.admins[chat][user] }
 func (s *Service) applyConfiguredSpeed(ctx context.Context,chat int64,path string)(string,error){
  featureMu.Lock();speed:=features.Speeds[chat];featureMu.Unlock();if speed==0||math.Abs(speed-1)<0.001{return path,nil}
  out:=strings.TrimSuffix(path,filepath.Ext(path))+fmt.Sprintf(".speed-%g",speed)+filepath.Ext(path)
