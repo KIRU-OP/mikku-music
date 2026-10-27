@@ -119,11 +119,11 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 		}
 	}
 
-	if s.handleExtendedCommand(ctx, b, msg, command, args, respond) { return }
 	if s.isFeatureBanned(msg.From) { respond("⛔ Your account is blocked from using this bot."); return }
 	s.rememberChat(msg.Chat.ID)
-	if command == "/play" && (msg.From == nil || !s.canPlayInChat(msg.Chat.ID,msg.From.ID)) { respond("⛔ This chat is in authorized-user play mode. Ask the owner to authorize you."); return }
-	if s.isMaintenanceEnabled() && (command == "/play" || command == "/queue") && (msg.From == nil || (!isOwner(msg.From.ID) && !s.isSudo(msg.From.ID))) { respond("🛠️ Bot is temporarily in maintenance mode."); return }
+	if (command == "/play" || command == "/playlist") && (msg.From == nil || !s.canPlayInChat(msg.Chat.ID,msg.From.ID)) { respond("⛔ This chat is in authorized-user play mode. Ask the owner to authorize you."); return }
+	if s.isMaintenanceEnabled() && (command == "/play" || command == "/playlist" || command == "/queue") && (msg.From == nil || (!isOwner(msg.From.ID) && !s.isSudo(msg.From.ID))) { respond("🛠️ Bot is temporarily in maintenance mode."); return }
+	if s.handleExtendedCommand(ctx, b, msg, command, args, respond) { return }
 	switch command {
 	case "/start":
 		respond("🎧 Mikku Music Go is online.\n\nUse /play <song or YouTube URL> to search and send an audio file in this chat. Use /queue, /skip, and /stop to manage requests.\n\nNote: this Go edition sends audio files as Telegram messages; Telegram Bot API does not provide group voice-chat streaming controls.")
