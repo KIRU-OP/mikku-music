@@ -63,8 +63,7 @@ addauth_success_with_count: "{emoji:✅} {user} eklendi.\nŞu an {count}/{limit}
 addauth_success: "{emoji:✅} {user} başarıyla yetkili kullanıcılar listesine eklendi."
 
 # 🤖 Bot Added to Chat
-bot_added_normal: "{emoji:🎵} Beni eklediğin için teşekkürler! Müzik çalmaya başlamak için /play [şarkı] komutunu kullan."
-
+bot_added_normal: "{emoji:🎵} Beni eklediğin için teşekkürler! Müzik çalmaya başlamak için /play [şarkı] komutunu kullan.\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
 # ⚠️ Bot Demotion
 bot_demotion_goodbye: |
   <b>{emoji:⚠️} Yetki Kaybedildi</b>
@@ -740,10 +739,8 @@ speed_reset_success: "{emoji:✅} Oynatma hızı {user} tarafından <b>1.0x</b> 
 
 speed_set: "{emoji:🚀} Oynatma hızı {user} tarafından <b>{speed}x</b> olarak ayarlandı."
 
-start_private: "Merhaba {user}, Benim adım {bot}.\n\nBen bazı kullanışlı özelliklere sahip bir Telegram akış botuyum. Youtube, Spotify, JioSaavn, Soundcloud vb. platformları destekliyorum.\n\nBeni gruplarına eklemekten çekinme. {emoji:👍}"
-
-start_group: "<b>{emoji:💫} Buradayım!</b> Bir komut dene... Tabi benimle başa çıkabileceğini düşünüyorsan {emoji:😉}"
-
+start_private: "Merhaba {user}, Benim adım {bot}.\n\nBen bazı kullanışlı özelliklere sahip bir Telegram akış botuyum. Youtube, Spotify, JioSaavn, Soundcloud vb. platformları destekliyorum.\n\nBeni gruplarına eklemekten çekinme. {emoji:👍}\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
+start_group: "<b>{emoji:💫} Buradayım!</b> Bir komut dene... Tabi benimle başa çıkabileceğini düşünüyorsan {emoji:😉}\n\n<b>✦ кιяυ [ 𝚂ʌηᴧᴛᴧηɪ ] ✦</b>"
 stream_queue_finished: "{emoji:🎵} <b>Sıra Bitti!</b>\n\nÇalacak başka şarkı kalmadı. Daha fazla parça eklemek için /play kullan! {emoji:🎶}"
 stream_downloading_next: "{emoji:📥} Sonraki parçan indiriliyor..."
 stream_autoplay_next: "{emoji:🔁} Otomatik Çalma: <b>{title}</b>"
