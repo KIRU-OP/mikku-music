@@ -104,6 +104,14 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 	if text == "" { return }
 	fields := strings.Fields(text)
 	command := strings.ToLower(strings.SplitN(fields[0], "@", 2)[0])
+	playAsVideo := false
+	switch command {
+	case "/vplay", "/cvplay", "/vplayforce", "/cvplayforce":
+		playAsVideo = true
+		command = "/play"
+	case "/playforce", "/cplay", "/cplayforce":
+		command = "/play"
+	}
 	args := strings.TrimSpace(strings.TrimPrefix(text, fields[0]))
 	respond := func(value string) {
 		if _, err := b.SendMessage(ctx, &bot.SendMessageParams{ChatID: msg.Chat.ID, Text: value}); err != nil {
@@ -118,7 +126,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 	case "/start":
 		respond("🎧 Mikku Music Go is online.\n\nUse /play <song or YouTube URL> to search and send an audio file in this chat. Use /queue, /skip, and /stop to manage requests.\n\nNote: this Go edition sends audio files as Telegram messages; Telegram Bot API does not provide group voice-chat streaming controls.")
 	case "/help":
-		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list authorized IDs\n/lang — language setting (en/hi/pa/ba)\n/mode — playback access mode\n/loop — repeat current track\n/shuffle — shuffle upcoming queue\n/speed — processing speed for upcoming audio\n/maintenance — owner/sudo maintenance switch\n/addsudo /delsudo — manage sudo users\n/block /unblock — block bot users\n/gban /ungban — global bot-level block\n/play <song or supported music URL> — search and send audio\n/playlist <YouTube playlist URL> — queue playlist tracks\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
+		respond("🎵 Mikku Music — Go edition\n/start — welcome\n/help — commands\n/ping — health check\n/stats — uptime and request counters\n/active — active download chats\n/settings — current runtime settings\n/auth <user ID> — owner-only authorization\n/unauth <user ID> — owner-only revoke authorization\n/admins — list authorized IDs\n/lang — language setting (en/hi/pa/ba)\n/mode — playback access mode\n/loop — repeat current track\n/shuffle — shuffle upcoming queue\n/speed — processing speed for upcoming audio\n/maintenance — owner/sudo maintenance switch\n/addsudo /delsudo — manage sudo users\n/block /unblock — block bot users\n/gban /ungban — global bot-level block\n/play <song or supported music URL> — search and send audio\n/vplay <song or YouTube URL> — send video\n/playlist <YouTube playlist URL> — queue playlist tracks\n/queue — show upcoming requests\n/skip — cancel current download or skip the next request\n/stop — cancel current download and clear the queue\n\nRequires yt-dlp and ffmpeg installed on the host. YouTube availability is controlled by YouTube and may vary.")
 	case "/ping":
 		respond("🏓 Pong! Mikku Go bot is online.")
 	case "/stats":
@@ -195,7 +203,7 @@ func (s *Service) Handle(ctx context.Context, b *bot.Bot, update *models.Update)
 			requestedBy = msg.From.Username
 			if requestedBy == "" { requestedBy = msg.From.FirstName }
 		}
-		item := music.Item{Title: track.Title, RequestedBy: requestedBy, URL: track.URL, ID: track.ID, DurationSec: track.DurationSec, Thumbnail: track.Thumbnail}
+		item := music.Item{Title: track.Title, RequestedBy: requestedBy, URL: track.URL, ID: track.ID, DurationSec: track.DurationSec, Thumbnail: track.Thumbnail, Video: playAsVideo}
 		if err := s.queues.Enqueue(msg.Chat.ID, item); err != nil { respond("❌ " + err.Error()); return }
 		s.mu.Lock(); s.requests++; s.mu.Unlock()
 		respond(fmt.Sprintf("📥 Added to queue: %s (%s)", track.Title, track.DurationMin))
@@ -262,7 +270,8 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 		s.mu.Unlock()
 
 		downloadCtx, timeoutCancel := context.WithTimeout(playCtx, 8*time.Minute)
-		path, err := s.youtube.Download(downloadCtx, item.URL, "audio")
+		format := "audio"; if item.Video { format = "video" }
+		path, err := s.youtube.Download(downloadCtx, item.URL, format)
 		timeoutCancel()
 		if err != nil {
 			cancel()
@@ -271,11 +280,11 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 			continue
 		}
 		originalPath := path
-		path, err = s.applyConfiguredSpeed(downloadCtx, chatID, path)
-		if err != nil { cancel(); s.clearCurrentCancel(chatID); s.sendText(parent, b, chatID, "❌ Could not apply speed: "+short(err.Error(), 160)); continue }
+		path, err = s.applyConfiguredSpeed(playCtx, chatID, path)
+		if err != nil { _ = os.Remove(originalPath); cancel(); s.clearCurrentCancel(chatID); s.sendText(parent, b, chatID, "❌ Could not apply speed: "+short(err.Error(), 160)); continue }
 		info, err := os.Stat(path)
 		if err != nil || info.Size() == 0 {
-			cancel(); _ = os.Remove(path); s.clearCurrentCancel(chatID)
+			cancel(); _ = os.Remove(path); if originalPath != path { _ = os.Remove(originalPath) }; s.clearCurrentCancel(chatID)
 			s.sendText(parent, b, chatID, "❌ Download output was empty or unavailable.")
 			continue
 		}
@@ -286,11 +295,11 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 		}
 		file, err := os.Open(path)
 		if err == nil {
-			_, err = b.SendAudio(playCtx, &bot.SendAudioParams{
-				ChatID: chatID,
-				Audio: &models.InputFileUpload{Filename: filepath.Base(path), Data: file},
-				Title: item.Title, Duration: item.DurationSec, Caption: "🎧 " + item.Title,
-			})
+			if item.Video {
+				_, err = b.SendVideo(playCtx, &bot.SendVideoParams{ChatID: chatID, Video: &models.InputFileUpload{Filename: filepath.Base(path), Data: file}, Duration: item.DurationSec, Caption: "🎬 " + item.Title})
+			} else {
+				_, err = b.SendAudio(playCtx, &bot.SendAudioParams{ChatID: chatID, Audio: &models.InputFileUpload{Filename: filepath.Base(path), Data: file}, Title: item.Title, Duration: item.DurationSec, Caption: "🎧 " + item.Title})
+			}
 			_ = file.Close()
 		}
 		cancel()

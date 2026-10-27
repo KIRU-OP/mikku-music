@@ -21,6 +21,7 @@ type Item struct {
 	ID          string
 	DurationSec int
 	Thumbnail   string
+	Video       bool
 }
 
 type Queues struct {
