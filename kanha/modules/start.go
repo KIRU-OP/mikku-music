@@ -23,7 +23,7 @@ import (
 	td "github.com/Kanha/Meow"
 
 	"KanhaMusic/config"
-	"KanhaMusic/kanha/core"
+	"KanhaMusic/mikku/core"
 	"KanhaMusic/kanha/database"
 	"KanhaMusic/kanha/locales"
 )
