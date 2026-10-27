@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"context"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestFindMediaURLRejectsNonHTTPS(t *testing.T) {
 
 func TestWorkerFallbackRequiresConfig(t *testing.T) {
 	a := New(Config{})
-	if _, err := a.WorkerFallback(t.Context(), "dQw4w9WgXcQ", "audio"); err == nil {
+	if _, err := a.WorkerFallback(context.Background(), "dQw4w9WgXcQ", "audio"); err == nil {
 		t.Fatal("expected an error when Worker fallback is not configured")
 	}
 }
