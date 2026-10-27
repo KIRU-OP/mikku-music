@@ -28,8 +28,10 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: go mod tidy
-      - name: Verify formatting
-        run: test -z "$(find . -type f -name "*.go" -not -path "./vendor/*" -print0 | xargs -0 gofmt -l)"
+      - name: Format Go sources
+        run: find . -type f -name "*.go" -not -path "./vendor/*" -print0 | xargs -0 gofmt -w
+      - name: Check whitespace errors
+        run: git diff --check
       - name: Test
         run: go test -race ./...
       - name: Build
