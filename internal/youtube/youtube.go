@@ -188,12 +188,38 @@ func (a *API) Search(ctx context.Context, query string, limit int) ([]Track, err
 
 func (a *API) Details(ctx context.Context, input string) (Track, error) {
 	input = strings.TrimSpace(input)
-	if id := a.VideoID(input); id != "" { input = defaultBase + id } else if u, err := cleanURL(input); err == nil { input = u }
-	a.mu.RLock(); cached, ok := a.cache[input]; a.mu.RUnlock()
-	if ok && time.Now().Before(cached.expires) { return cached.track, nil }
-	r, err := a.runJSON(ctx, input); if err != nil { return Track{}, err }
-	t, err := toTrack(r); if err != nil { return Track{}, err }
-	a.mu.Lock(); a.cache[input] = cacheEntry{track:t, expires:time.Now().Add(a.cfg.CacheTTL)}; a.mu.Unlock()
+	if input == "" {
+		return Track{}, errors.New("YouTube URL, video ID, or search query is required")
+	}
+	if id := a.VideoID(input); id != "" {
+		input = defaultBase + id
+	} else if u, err := cleanURL(input); err == nil {
+		input = u
+	} else {
+		results, searchErr := a.Search(ctx, input, 1)
+		if searchErr != nil {
+			return Track{}, searchErr
+		}
+		return results[0], nil
+	}
+
+	a.mu.RLock()
+	cached, ok := a.cache[input]
+	a.mu.RUnlock()
+	if ok && time.Now().Before(cached.expires) {
+		return cached.track, nil
+	}
+	r, err := a.runJSON(ctx, input)
+	if err != nil {
+		return Track{}, err
+	}
+	t, err := toTrack(r)
+	if err != nil {
+		return Track{}, err
+	}
+	a.mu.Lock()
+	a.cache[input] = cacheEntry{track: t, expires: time.Now().Add(a.cfg.CacheTTL)}
+	a.mu.Unlock()
 	return t, nil
 }
 
@@ -205,10 +231,23 @@ func (a *API) TrackDetails(ctx context.Context, input string) (Track, error) { r
 // VideoStream resolves a video-only-or-combined stream up to 720p. The returned
 // signed URL can expire, so resolve it immediately before handing it to a player.
 func (a *API) VideoStream(ctx context.Context, input string) (string, error) {
-	u, err := cleanURL(input); if err != nil { if id:=a.VideoID(input); id!="" { u=defaultBase+id } else { return "",err } }
+	u, err := cleanURL(input)
+	if err != nil {
+		if id := a.VideoID(input); id != "" {
+			u = defaultBase + id
+		} else {
+			return "", errors.New("a valid YouTube URL or video ID is required")
+		}
+	}
 	out, err := a.command(ctx, "-g", "-f", "best[height<=720][width<=1280]/best", u)
-	if err != nil { return "", err }
-	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") { if strings.TrimSpace(line)!="" { return strings.TrimSpace(line),nil } }
+	if err != nil {
+		return "", err
+	}
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		if strings.TrimSpace(line) != "" {
+			return strings.TrimSpace(line), nil
+		}
+	}
 	return "", errors.New("yt-dlp returned no stream URL")
 }
 
@@ -224,18 +263,45 @@ func (a *API) Playlist(ctx context.Context, input string, limit int) ([]string, 
 }
 
 func (a *API) Download(ctx context.Context, input, format string) (string, error) {
-	u, err := cleanURL(input); if err != nil { if id:=a.VideoID(input); id!="" { u=defaultBase+id } else { return "",err } }
-	if format != "audio" && format != "video" { return "", errors.New("format must be audio or video") }
-	if err := os.MkdirAll(a.cfg.DownloadDir, 0750); err != nil { return "", err }
+	u, err := cleanURL(input)
+	if err != nil {
+		if id := a.VideoID(input); id != "" {
+			u = defaultBase + id
+		} else {
+			return "", errors.New("a valid YouTube URL or video ID is required")
+		}
+	}
+	if format != "audio" && format != "video" {
+		return "", errors.New("format must be audio or video")
+	}
+	if err := os.MkdirAll(a.cfg.DownloadDir, 0750); err != nil {
+		return "", err
+	}
 	outTemplate := filepath.Join(a.cfg.DownloadDir, "%(id)s.%(ext)s")
 	args := []string{"--no-playlist", "--no-part", "-o", outTemplate}
-	if format == "audio" { args=append(args,"-x","--audio-format","mp3") } else { args=append(args,"-f","best[height<=720]/best") }
-	args=append(args,u)
-	if _, err := a.command(ctx,args...); err != nil { return "",err }
-	r, err := a.runJSON(ctx,u); if err != nil { return "",err }
+	if format == "audio" {
+		args = append(args, "-x", "--audio-format", "mp3")
+	} else {
+		args = append(args, "-f", "best[height<=720]/best")
+	}
+	args = append(args, u)
+	if _, err := a.command(ctx, args...); err != nil {
+		return "", err
+	}
+	r, err := a.runJSON(ctx, u)
+	if err != nil {
+		return "", err
+	}
 	pattern := filepath.Join(a.cfg.DownloadDir, r.ID+".*")
-	matches, err := filepath.Glob(pattern); if err != nil { return "",err }
-	for _, name := range matches { if st,e:=os.Stat(name); e==nil && st.Size()>0 { return name,nil } }
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return "", err
+	}
+	for _, name := range matches {
+		if st, e := os.Stat(name); e == nil && st.Size() > 0 {
+			return name, nil
+		}
+	}
 	return "", errors.New("download completed but output file was not found")
 }
 
