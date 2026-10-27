@@ -4,14 +4,15 @@ This branch is the Go-only migration track for KIRU-OP/mikku-music.
 
 ## What works in this branch
 - Telegram Bot API polling and command dispatch.
-- /start, /help, /ping, /play, /queue, /skip, and /stop.
+- /start, /help, /ping, /stats, /active, /settings, /play, /vplay, /playlist, /queue, /skip, and /stop.
+- Persistent /lang, /mode, /loop, /shuffle, /speed, /maintenance, /auth, /unauth, /admins, /addsudo, /delsudo, /block, /unblock, and /broadcast.
 - YouTube search and metadata through yt-dlp.
-- Per-chat bounded in-memory queues with sequential audio download and delivery as Telegram audio messages.
+- Per-chat bounded queues with sequential audio/video download and delivery as Telegram media messages.
 - Cancellation of an active download, cleanup of downloaded files, upload-size checks, and unit tests.
 - Optional configured YouTube Worker fallback in the low-level resolver/download API.
 
 ## Important scope
-This branch sends audio as Telegram chat messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. It is not a feature-for-feature replacement for the original bot's Spotify/Apple Music/SoundCloud/Resso/Telegram providers, MongoDB settings, admin/sudo plugins, inline UI, or language packs. Those features must not be described as ported until they have real Go implementations and tests. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
+This branch sends audio as Telegram chat messages. It does not implement group voice-chat streaming or the original PyTgCalls assistant/session system. Music catalogue links are resolved by metadata and a YouTube search match, not native provider streams. MongoDB migration, real Telegram group-admin checks, full inline UI/callbacks, channel play and full language translations remain incomplete. The original default branch is not changed by this branch; this migration branch intentionally removes the Python source tree so the Go-only work can be reviewed separately.
 
 YouTube access is controlled by YouTube and may fail for restricted videos, bot checks, or unavailable content. Signed media URLs are temporary; this bot downloads the audio immediately instead of exposing a stale URL.
 
@@ -35,7 +36,7 @@ Run gofmt -w ., go test -race ./..., and go build -o /tmp/mikku ./cmd/mikku.
 
 ## Additional Go command ports
 
-The Go branch now includes persistent chat language/play-mode settings, queue repeat and shuffle, audio speed processing for future downloads, maintenance mode, sudo user management, and persistent bot-level user blocks. These settings are stored in `FEATURE_STORE_PATH` (default `data/features.json`) with restrictive file permissions.
+The Go branch now includes persistent chat language/play-mode settings, queue repeat and shuffle, audio speed processing for future downloads, maintenance mode, sudo user management, and persistent bot-level user blocks and owner/sudo broadcast to known chats. These settings are stored in `FEATURE_STORE_PATH` (default `data/features.json`) with restrictive file permissions.
 
 Compatibility boundary: commands that require Pyrogram MTProto sessions, PyTgCalls group voice/video chat, inline callback query handlers, or MongoDB-backed group state are not equivalent yet. In particular, `/pause`, `/resume`, and `/seek` explain that the Bot API edition sends complete audio messages and cannot control an active group call. Global block commands prevent use of this bot; they do not ban users across every Telegram group.
 

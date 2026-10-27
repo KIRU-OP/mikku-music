@@ -14,11 +14,11 @@ This checklist is intentionally honest: a feature is complete only after impleme
 
 ## Not yet equivalent to the original Python bot
 - [ ] Telegram group voice-chat playback and assistant sessions
-- [ ] Spotify/Apple Music/SoundCloud/Resso/Telegram media source adapters
+- [ ] Full source-specific adapters and original stream resolution for Spotify/Apple Music/SoundCloud/Resso/Telegram media
 - [ ] MongoDB persistence and settings migrations
-- [ ] Original admin/sudo permissions, bans, maintenance and all plugin commands
-- [ ] Inline UI, callback handlers, language packs and broadcasts
-- [ ] Pause/resume/seek/loop/shuffle/speed for an active voice-chat stream
+- [ ] Full Telegram group admin permission checks, original global-ban semantics and remaining plugin commands
+- [ ] Inline UI/callback handlers, full translation packs, channel-play routing, autoplay/autoleave/watchers
+- [ ] Pause/resume/seek controls for active voice-chat streams
 - [ ] Integration and end-to-end tests against a real Telegram chat and media source
 
 The original default branch is preserved. Do not merge this migration branch as a production replacement until the remaining requirements are implemented and verified.
