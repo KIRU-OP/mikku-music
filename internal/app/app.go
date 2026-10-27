@@ -280,7 +280,7 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 			continue
 		}
 		originalPath := path
-		path, err = s.applyConfiguredSpeed(playCtx, chatID, path)
+		if !item.Video { path, err = s.applyConfiguredSpeed(playCtx, chatID, path) }
 		if err != nil { _ = os.Remove(originalPath); cancel(); s.clearCurrentCancel(chatID); s.sendText(parent, b, chatID, "❌ Could not apply speed: "+short(err.Error(), 160)); continue }
 		info, err := os.Stat(path)
 		if err != nil || info.Size() == 0 {
@@ -289,8 +289,8 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 			continue
 		}
 		if info.Size() > maxTelegramAudioBytes {
-			cancel(); _ = os.Remove(path); s.clearCurrentCancel(chatID)
-			s.sendText(parent, b, chatID, "❌ Audio is larger than Telegram's bot upload limit; try a shorter track.")
+			cancel(); _ = os.Remove(path); if originalPath != path { _ = os.Remove(originalPath) }; s.clearCurrentCancel(chatID)
+			s.sendText(parent, b, chatID, "❌ Media is larger than Telegram's bot upload limit; try a shorter track.")
 			continue
 		}
 		file, err := os.Open(path)
@@ -306,7 +306,7 @@ func (s *Service) processQueue(parent context.Context, b *bot.Bot, chatID int64)
 		_ = os.Remove(path)
 		if originalPath != path { _ = os.Remove(originalPath) }
 		s.clearCurrentCancel(chatID)
-		if err != nil && playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Could not send audio: "+short(err.Error(), 180)) } else if err == nil { s.afterSuccessfulTrack(chatID, item) }
+		if err != nil && playCtx.Err() == nil { s.sendText(parent, b, chatID, "❌ Could not send media: "+short(err.Error(), 180)) } else if err == nil { s.afterSuccessfulTrack(chatID, item) }
 	}
 }
 
