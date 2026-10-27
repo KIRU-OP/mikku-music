@@ -173,7 +173,15 @@ func (a *API) Search(ctx context.Context, query string, limit int) ([]Track, err
 	query = strings.TrimSpace(query)
 	if query == "" { return nil, errors.New("search query is empty") }
 	if limit < 1 { limit = 1 }; if limit > 50 { limit = 50 }
-	r, err := a.runJSON(ctx, "--flat-playlist", fmt.Sprintf("ytsearch%d:%s", limit, query))
+	target := query
+	if videoIDPattern.MatchString(query) {
+		target = defaultBase + query
+	} else if normalized, normalizeErr := cleanURL(query); normalizeErr == nil {
+		target = normalized
+	} else {
+		target = fmt.Sprintf("ytsearch%d:%s", limit, query)
+	}
+	r, err := a.runJSON(ctx, "--flat-playlist", target)
 	if err != nil { return nil, err }
 	items := r.Entries; if len(items) == 0 { items = []*ytResult{r} }
 	tracks := make([]Track, 0, len(items))
