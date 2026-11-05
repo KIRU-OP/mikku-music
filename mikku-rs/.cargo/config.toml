@@ -1,0 +1,4 @@
+# ntgcalls-sys downloads its native static library at build time. If that download is blocked
+# (proxy / offline), fetch ntgcalls.<os>-static_libs.zip yourself, unzip it and point this at its lib/ dir:
+# [env]
+# NTGCALLS_LIB_DIR = "/path/to/ntgcalls/lib"

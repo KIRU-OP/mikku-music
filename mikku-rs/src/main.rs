@@ -1,5 +1,6 @@
-//! Mikku Music - Rust port of the Python Telegram voice-chat music bot.
+//! Mikku Music - pure Rust Telegram voice-chat music bot.
 
+mod app;
 mod config;
 mod db;
 mod strings;
@@ -19,6 +20,10 @@ async fn main() -> anyhow::Result<()> {
     let _ = dotenvy::dotenv();
     init_logging();
 
+    if std::env::args().nth(1).as_deref() == Some("gen-session") {
+        return app::gen_session().await;
+    }
+
     if CONFIG.assistant_sessions().is_empty() {
         tracing::error!("⚙️ Assistant client variables not defined, exiting...");
         std::process::exit(1);
@@ -26,7 +31,12 @@ async fn main() -> anyhow::Result<()> {
 
     strings::load("./strings/langs")?;
     db::connect(&CONFIG.mongo_db_uri).await?;
+    app::load_sudoers().await;
+    app::load_banned().await;
+    let app = app::init().await?;
+    tracing::info!("mikku started as @{} with {} assistant(s)", app.bot_username, app.assistants.len());
 
-    tracing::info!("mikku (rust) core initialised");
+    tokio::signal::ctrl_c().await?;
+    tracing::info!("🚫 Stopping Mikku Music Bot...");
     Ok(())
 }

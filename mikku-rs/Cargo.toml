@@ -6,9 +6,8 @@ description = "Mikku Music - Telegram voice chat music bot (Rust port)"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-grammers-client = "0.11"
-grammers-session = "0.11"
-grammers-tl-types = "0.11"
+ferogram = "0.6.6"
+tgcalls = "0.3"
 mongodb = "3"
 bson = "2"
 futures = "0.3"
