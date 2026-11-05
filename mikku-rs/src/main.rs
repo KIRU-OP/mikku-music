@@ -4,6 +4,7 @@ mod app;
 mod config;
 mod db;
 mod strings;
+mod tg;
 
 use config::CONFIG;
 use tracing_subscriber::EnvFilter;

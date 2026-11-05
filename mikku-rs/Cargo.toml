@@ -2,11 +2,11 @@
 name = "mikku"
 version = "0.1.0"
 edition = "2021"
-description = "Mikku Music - Telegram voice chat music bot (Rust port)"
+description = "Mikku Music - Telegram voice chat music bot (pure Rust)"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-ferogram = "0.6.6"
+ferogram = { version = "0.6.6", features = ["parsers"] }
 tgcalls = "0.3"
 mongodb = "3"
 bson = "2"
@@ -33,6 +33,11 @@ imageproc = "0.25"
 ab_glyph = "0.2"
 sysinfo = "0.32"
 base64 = "0.22"
+scraper = "0.20"
+urlencoding = "2"
+bytes = "1"
+tokio-util = { version = "0.7", features = ["rt"] }
+html-escape = "0.2"
 
 [profile.release]
 opt-level = 3
